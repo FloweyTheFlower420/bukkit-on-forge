@@ -11,6 +11,8 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.attribute.AttributeModifier;
 
+import javax.annotation.Nonnull;
+
 public class ForgeBukkitAttributeInstance extends Wrapper<ModifiableAttributeInstance> implements AttributeInstance {
     private final Attribute attribute;
 
@@ -20,6 +22,7 @@ public class ForgeBukkitAttributeInstance extends Wrapper<ModifiableAttributeIns
     }
 
     @Override
+    @Nonnull
     public Attribute getAttribute() {
         return attribute;
     }
@@ -35,6 +38,7 @@ public class ForgeBukkitAttributeInstance extends Wrapper<ModifiableAttributeIns
     }
 
     @Override
+    @Nonnull
     public Collection<AttributeModifier> getModifiers() {
         List<AttributeModifier> result = new ArrayList<>();
         for (net.minecraft.entity.ai.attributes.AttributeModifier mc : getHandle().getModifierListCopy()) {
@@ -45,13 +49,13 @@ public class ForgeBukkitAttributeInstance extends Wrapper<ModifiableAttributeIns
     }
 
     @Override
-    public void addModifier(AttributeModifier modifier) {
+    public void addModifier(@Nonnull AttributeModifier modifier) {
         Preconditions.checkArgument(modifier != null, "modifier");
         getHandle().applyPersistentModifier(convert(modifier));
     }
 
     @Override
-    public void removeModifier(AttributeModifier modifier) {
+    public void removeModifier(@Nonnull AttributeModifier modifier) {
         Preconditions.checkArgument(modifier != null, "modifier");
         getHandle().removeModifier(convert(modifier));
     }

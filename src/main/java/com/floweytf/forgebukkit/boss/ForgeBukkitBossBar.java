@@ -1,11 +1,14 @@
 package com.floweytf.forgebukkit.boss;
 
+import com.floweytf.forgebukkit.ForgeBukkit;
 import com.floweytf.forgebukkit.Wrapper;
+import com.floweytf.forgebukkit.entity.ForgeBukkitEntity;
 import com.floweytf.forgebukkit.entity.ForgeBukkitPlayer;
 import com.floweytf.forgebukkit.util.ForgeBukkitChatMessage;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.play.server.SUpdateBossInfoPacket;
 import net.minecraft.world.BossInfo;
 import net.minecraft.world.server.ServerBossInfo;
 import org.bukkit.boss.BarColor;
@@ -14,6 +17,8 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 
+import javax.annotation.Nonnull;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +31,7 @@ public class ForgeBukkitBossBar extends Wrapper<ServerBossInfo> implements BossB
     public ForgeBukkitBossBar(String title, BarColor color, BarStyle style, BarFlag... flags) {
         super(null);
 
-        super.setHandle(ServerBossInfo(
+        super.setHandle(new ServerBossInfo(
                 ForgeBukkitChatMessage.fromString(title, true)[0],
                 convertColor(color),
                 convertStyle(style)
@@ -49,9 +54,9 @@ public class ForgeBukkitBossBar extends Wrapper<ServerBossInfo> implements BossB
 
     private void initialize() {
         this.flags = new HashMap<>();
-        this.flags.put(BarFlag.DARKEN_SKY, new FlagContainer(handle::shouldDarkenSky, handle::setDarkenSky));
-        this.flags.put(BarFlag.PLAY_BOSS_MUSIC, new FlagContainer(handle::shouldPlayEndBossMusic, handle::setPlayEndBossMusic));
-        this.flags.put(BarFlag.CREATE_FOG, new FlagContainer(handle::shouldCreateFog, handle::setCreateFog));
+        this.flags.put(BarFlag.DARKEN_SKY, new FlagContainer(getHandle()::shouldDarkenSky, getHandle()::setDarkenSky));
+        this.flags.put(BarFlag.PLAY_BOSS_MUSIC, new FlagContainer(getHandle()::shouldPlayEndBossMusic, getHandle()::setPlayEndBossMusic));
+        this.flags.put(BarFlag.CREATE_FOG, new FlagContainer(getHandle()::shouldCreateFog, getHandle()::setCreateFog));
     }
 
     private BarColor convertColor(BossInfo.Color color) {
@@ -97,40 +102,55 @@ public class ForgeBukkitBossBar extends Wrapper<ServerBossInfo> implements BossB
     }
 
     @Override
+    @Nonnull
     public String getTitle() {
-        return ForgeBukkitChatMessage.fromComponent(handle.getName());
+        return ForgeBukkitChatMessage.fromComponent(getHandle().getName());
     }
 
     @Override
     public void setTitle(String title) {
-        handle.setName(ForgeBukkitChatMessage.fromString(title, true)[0]);
-        handle.setName(ForgeBukkitChatMessage.Action.UPDATE_NAME);
+        getHandle().setName(ForgeBukkitChatMessage.fromString(title, true)[0]);
+        try {
+            ForgeBukkit.sendUpdate.invoke(getHandle(), SUpdateBossInfoPacket.Operation.UPDATE_NAME);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            ForgeBukkit.LOGGER.fatal("Unable to invoke", e);
+        }
     }
 
     @Override
+    @Nonnull
     public BarColor getColor() {
-        return convertColor(handle.getColor());
+        return convertColor(getHandle().getColor());
     }
 
     @Override
-    public void setColor(BarColor color) {
-        handle.setColor(convertColor(color));
-        handle.sendUpdate(PacketPlayOutBoss.Action.UPDATE_STYLE);
+    public void setColor(@Nonnull BarColor color) {
+        getHandle().setColor(convertColor(color));
+        try {
+            ForgeBukkit.sendUpdate.invoke(getHandle(), SUpdateBossInfoPacket.Operation.UPDATE_NAME);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            ForgeBukkit.LOGGER.fatal("Unable to invoke", e);
+        }
     }
 
     @Override
+    @Nonnull
     public BarStyle getStyle() {
-        return convertStyle(handle.style);
+        return convertStyle(getHandle().getOverlay());
     }
 
     @Override
-    public void setStyle(BarStyle style) {
-        handle.style = convertStyle(style);
-        handle.sendUpdate(PacketPlayOutBoss.Action.UPDATE_STYLE);
+    public void setStyle(@Nonnull BarStyle style) {
+        getHandle().setOverlay(convertStyle(style));
+        try {
+            ForgeBukkit.sendUpdate.invoke(getHandle(), SUpdateBossInfoPacket.Operation.UPDATE_NAME);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            ForgeBukkit.LOGGER.fatal("Unable to invoke", e);
+        }
     }
 
     @Override
-    public void addFlag(BarFlag flag) {
+    public void addFlag(@Nonnull BarFlag flag) {
         FlagContainer flagContainer = flags.get(flag);
         if (flagContainer != null) {
             flagContainer.set.accept(true);
@@ -138,7 +158,7 @@ public class ForgeBukkitBossBar extends Wrapper<ServerBossInfo> implements BossB
     }
 
     @Override
-    public void removeFlag(BarFlag flag) {
+    public void removeFlag(@Nonnull BarFlag flag) {
         FlagContainer flagContainer = flags.get(flag);
         if (flagContainer != null) {
             flagContainer.set.accept(false);
@@ -146,7 +166,7 @@ public class ForgeBukkitBossBar extends Wrapper<ServerBossInfo> implements BossB
     }
 
     @Override
-    public boolean hasFlag(BarFlag flag) {
+    public boolean hasFlag(@Nonnull BarFlag flag) {
         FlagContainer flagContainer = flags.get(flag);
         if (flagContainer != null) {
             return flagContainer.get.get();
@@ -157,56 +177,57 @@ public class ForgeBukkitBossBar extends Wrapper<ServerBossInfo> implements BossB
     @Override
     public void setProgress(double progress) {
         Preconditions.checkArgument(progress >= 0.0 && progress <= 1.0, "Progress must be between 0.0 and 1.0 (%s)", progress);
-        handle.setPercent((float) progress);
+        getHandle().setPercent((float) progress);
     }
 
     @Override
     public double getProgress() {
-        return handle.getPercent();
+        return getHandle().getPercent();
     }
 
     @Override
-    public void addPlayer(Player player) {
+    public void addPlayer(@Nonnull Player player) {
         Preconditions.checkArgument(player != null, "player == null");
-        Preconditions.checkArgument(((ForgeBukkitPlayer) player).getHandle().playerConnection != null, "player is not fully connected (wait for PlayerJoinEvent)");
+        Preconditions.checkArgument(((ForgeBukkitPlayer) player).getHandle().connection != null, "player is not fully connected (wait for PlayerJoinEvent)");
 
-        handle.addPlayer(((ForgeBukkitPlayer) player).getHandle());
+        getHandle().addPlayer(((ForgeBukkitPlayer) player).getHandle());
     }
 
     @Override
-    public void removePlayer(Player player) {
+    public void removePlayer(@Nonnull Player player) {
         Preconditions.checkArgument(player != null, "player == null");
 
-        handle.removePlayer(((ForgeBukkitPlayer) player).getHandle());
+        getHandle().removePlayer(((ForgeBukkitPlayer) player).getHandle());
     }
 
     @Override
+    @Nonnull
     public List<Player> getPlayers() {
         ImmutableList.Builder<Player> players = ImmutableList.builder();
-        for (ServerPlayerEntity p : handle.getPlayers()) {
-            players.add(p.getBukkitEntity());
+        for (ServerPlayerEntity p : getHandle().getPlayers()) {
+            players.add((Player) ForgeBukkitEntity.wrap(p));
         }
         return players.build();
     }
 
     @Override
     public void setVisible(boolean visible) {
-        handle.setVisible(visible);
+        getHandle().setVisible(visible);
     }
 
     @Override
     public boolean isVisible() {
-        return handle.visible;
+        return getHandle().isVisible();
     }
 
     @Override
     public void show() {
-        handle.setVisible(true);
+        getHandle().setVisible(true);
     }
 
     @Override
     public void hide() {
-        handle.setVisible(false);
+        getHandle().setVisible(false);
     }
 
     @Override

@@ -10,13 +10,15 @@ import org.bukkit.attribute.Attributable;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 
+import javax.annotation.Nonnull;
+
 public class ForgeBukkitAttributeMap extends Wrapper<AttributeModifierManager> implements Attributable {
     public ForgeBukkitAttributeMap(AttributeModifierManager handle) {
         super(handle);
     }
 
     @Override
-    public AttributeInstance getAttribute(Attribute attribute) {
+    public AttributeInstance getAttribute(@Nonnull Attribute attribute) {
         Preconditions.checkArgument(attribute != null, "attribute");
         ModifiableAttributeInstance mc = getHandle().createInstanceIfAbsent(toMinecraft(attribute));
 

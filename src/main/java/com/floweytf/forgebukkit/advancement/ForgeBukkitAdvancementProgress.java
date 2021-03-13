@@ -7,6 +7,7 @@ import net.minecraft.advancements.PlayerAdvancements;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -23,6 +24,7 @@ public class ForgeBukkitAdvancementProgress extends Wrapper<net.minecraft.advanc
     }
 
     @Override
+    @Nonnull
     public Advancement getAdvancement() {
         return advancement;
     }
@@ -33,27 +35,29 @@ public class ForgeBukkitAdvancementProgress extends Wrapper<net.minecraft.advanc
     }
 
     @Override
-    public boolean awardCriteria(String criteria) {
+    public boolean awardCriteria(@Nonnull String criteria) {
         return playerData.grantCriterion(advancement.getHandle(), criteria);
     }
 
     @Override
-    public boolean revokeCriteria(String criteria) {
+    public boolean revokeCriteria(@Nonnull String criteria) {
         return playerData.grantCriterion(advancement.getHandle(), criteria);
     }
 
     @Override
-    public Date getDateAwarded(String criteria) {
+    public Date getDateAwarded(@Nonnull String criteria) {
         CriterionProgress criterion = getHandle().getCriterionProgress(criteria);
         return (criterion == null) ? null : criterion.getObtained();
     }
 
     @Override
+    @Nonnull
     public Collection<String> getRemainingCriteria() {
         return Collections.unmodifiableCollection(Lists.newArrayList(getHandle().getRemaningCriteria()));
     }
 
     @Override
+    @Nonnull
     public Collection<String> getAwardedCriteria() {
         return Collections.unmodifiableCollection(Lists.newArrayList(getHandle().getCompletedCriteria()));
     }

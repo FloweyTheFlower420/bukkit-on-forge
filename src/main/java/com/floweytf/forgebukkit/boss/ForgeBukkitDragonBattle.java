@@ -1,19 +1,21 @@
 package com.floweytf.forgebukkit.boss;
 
+import com.floweytf.forgebukkit.ForgeBukkit;
 import com.floweytf.forgebukkit.ForgeBukkitWorld;
 import com.floweytf.forgebukkit.Wrapper;
+import com.floweytf.forgebukkit.entity.ForgeBukkitEntity;
 import com.floweytf.forgebukkit.mixins.DragonFightManagerMixin;
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.end.DragonFightManager;
 import net.minecraft.world.end.DragonSpawnState;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.bukkit.Location;
 import org.bukkit.boss.BossBar;
 import org.bukkit.boss.DragonBattle;
 import org.bukkit.entity.EnderDragon;
 
-import java.lang.reflect.Method;
+import javax.annotation.Nonnull;
+import java.lang.reflect.InvocationTargetException;
 
 public class ForgeBukkitDragonBattle extends Wrapper<DragonFightManager> implements DragonBattle {
     public ForgeBukkitDragonBattle(DragonFightManager handle) {
@@ -23,10 +25,11 @@ public class ForgeBukkitDragonBattle extends Wrapper<DragonFightManager> impleme
     @Override
     public EnderDragon getEnderDragon() {
         Entity entity = getAccessor().getWorld().getEntityByUuid(getAccessor().getDragonUUID());
-        return (entity != null) ? (EnderDragon) entity.getBukkitEntity() : null;
+        return (entity != null) ? (EnderDragon) ForgeBukkitEntity.wrap(entity) : null;
     }
 
     @Override
+    @Nonnull
     public BossBar getBossBar() {
         return new ForgeBukkitBossBar(getAccessor().getBossInfo());
     }
@@ -46,9 +49,12 @@ public class ForgeBukkitDragonBattle extends Wrapper<DragonFightManager> impleme
             return false;
         }
 
-        ObfuscationReflectionHelper.getPrivateValue(DragonFightManager.class, getHandle(), "func_186094_a");
+        try {
+            return (boolean) ForgeBukkit.generatePortal.invoke(getHandle(), withPortals);
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            ForgeBukkit.LOGGER.fatal("Reflection exec failed!", e);
+        }
 
-        this.getHandle().generatePortal(withPortals);
         return true;
     }
 
@@ -63,12 +69,13 @@ public class ForgeBukkitDragonBattle extends Wrapper<DragonFightManager> impleme
     }
 
     @Override
+    @Nonnull
     public RespawnPhase getRespawnPhase() {
         return toBukkitRespawnPhase(getAccessor().getSpawnState());
     }
 
     @Override
-    public boolean setRespawnPhase(RespawnPhase phase) {
+    public boolean setRespawnPhase(@Nonnull RespawnPhase phase) {
         Preconditions.checkArgument(phase != null && phase != RespawnPhase.NONE, "Invalid respawn phase provided: %s", phase);
 
         if (getAccessor().getSpawnState()== null) {

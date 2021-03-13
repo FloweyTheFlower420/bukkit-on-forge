@@ -5,6 +5,7 @@ import com.floweytf.forgebukkit.util.ForgeBukkitNamespacedKey;
 import org.bukkit.NamespacedKey;
 import org.bukkit.advancement.Advancement;
 
+import javax.annotation.Nonnull;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -14,11 +15,13 @@ public class ForgeBukkitAdvancement extends Wrapper<net.minecraft.advancements.A
     }
 
     @Override
+    @Nonnull
     public NamespacedKey getKey() {
         return ForgeBukkitNamespacedKey.fromMinecraft(getHandle().getId());
     }
 
     @Override
+    @Nonnull
     public Collection<String> getCriteria() {
         return Collections.unmodifiableCollection(getHandle().getCriteria().keySet());
     }

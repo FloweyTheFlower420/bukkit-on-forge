@@ -5,6 +5,8 @@ import net.minecraft.server.CustomServerBossInfo;
 import org.bukkit.NamespacedKey;
 import org.bukkit.boss.KeyedBossBar;
 
+import javax.annotation.Nonnull;
+
 public class ForgeBukkitKeyedBossbar extends ForgeBukkitBossBar implements KeyedBossBar {
 
     public ForgeBukkitKeyedBossbar(CustomServerBossInfo bossBattleCustom) {
@@ -12,6 +14,7 @@ public class ForgeBukkitKeyedBossbar extends ForgeBukkitBossBar implements Keyed
     }
 
     @Override
+    @Nonnull
     public NamespacedKey getKey() {
         return ForgeBukkitNamespacedKey.fromMinecraft(getHandle().getId());
     }
