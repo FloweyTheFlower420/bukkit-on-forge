@@ -16,7 +16,7 @@ public class ForgeBukkitBlockData implements BlockData {
     }
 
     /**
-     * Gets a string, which when passed into a method such as
+     *      * Gets a string, which when passed into a method such as
      * {@link Server#createBlockData(String)} will unambiguously
      * recreate this instance.
      *

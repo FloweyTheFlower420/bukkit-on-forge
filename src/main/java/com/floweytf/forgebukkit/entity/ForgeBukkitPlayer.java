@@ -37,8 +37,12 @@ import java.util.*;
 
 public class ForgeBukkitPlayer extends Wrapper<ServerPlayerEntity> implements Player {
 
-    protected ForgeBukkitPlayer(ServerPlayerEntity handle) {
+    public ForgeBukkitPlayer(ServerPlayerEntity handle) {
         super(handle);
+    }
+
+    public static ForgeBukkitPlayer wrap(ServerPlayerEntity mc) {
+        return new ForgeBukkitPlayer(mc);
     }
 
     @Override
