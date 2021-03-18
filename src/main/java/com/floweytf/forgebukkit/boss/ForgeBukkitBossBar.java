@@ -113,7 +113,7 @@ public class ForgeBukkitBossBar extends Wrapper<ServerBossInfo> implements BossB
         try {
             ForgeBukkit.sendUpdate.invoke(getHandle(), SUpdateBossInfoPacket.Operation.UPDATE_NAME);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            ForgeBukkit.LOGGER.fatal("Unable to invoke", e);
+            ForgeBukkit.logger.fatal("Unable to invoke", e);
         }
     }
 
@@ -129,7 +129,7 @@ public class ForgeBukkitBossBar extends Wrapper<ServerBossInfo> implements BossB
         try {
             ForgeBukkit.sendUpdate.invoke(getHandle(), SUpdateBossInfoPacket.Operation.UPDATE_NAME);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            ForgeBukkit.LOGGER.fatal("Unable to invoke", e);
+            ForgeBukkit.logger.fatal("Unable to invoke", e);
         }
     }
 
@@ -145,7 +145,7 @@ public class ForgeBukkitBossBar extends Wrapper<ServerBossInfo> implements BossB
         try {
             ForgeBukkit.sendUpdate.invoke(getHandle(), SUpdateBossInfoPacket.Operation.UPDATE_NAME);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            ForgeBukkit.LOGGER.fatal("Unable to invoke", e);
+            ForgeBukkit.logger.fatal("Unable to invoke", e);
         }
     }
 

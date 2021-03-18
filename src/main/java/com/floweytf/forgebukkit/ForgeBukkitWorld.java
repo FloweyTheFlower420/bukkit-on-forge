@@ -21,10 +21,10 @@ import java.io.File;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class ForgeBukkitWorld implements World {
+public class ForgeBukkitWorld extends Wrapper<net.minecraft.world.World> implements World {
 
-    ForgeBukkitWorld(World world) {
-
+    ForgeBukkitWorld(net.minecraft.world.World world) {
+        super(world);
     }
 
     public static ForgeBukkitWorld getWorldWrapper(net.minecraft.world.World world) {
@@ -39,26 +39,6 @@ public class ForgeBukkitWorld implements World {
     @Override
     public Block getBlockAt(Location location) {
         return null;
-    }
-
-    /**
-     * @param i
-     * @param i1
-     * @param i2
-     * @deprecated
-     */
-    @Override
-    public int getBlockTypeIdAt(int i, int i1, int i2) {
-        return 0;
-    }
-
-    /**
-     * @param location
-     * @deprecated
-     */
-    @Override
-    public int getBlockTypeIdAt(Location location) {
-        return 0;
     }
 
     @Override
@@ -386,8 +366,36 @@ public class ForgeBukkitWorld implements World {
         return null;
     }
 
+    /**
+     * Drops an item at the specified {@link Location}
+     * Note that functions will run before the entity is spawned
+     *
+     * @param location Location to drop the item
+     * @param item     ItemStack to drop
+     * @param function the function to be run before the entity is spawned.
+     * @return ItemDrop entity created as a result of this method
+     */
+    @Override
+    public Item dropItem(Location location, ItemStack item, Consumer<Item> function) {
+        return null;
+    }
+
     @Override
     public Item dropItemNaturally(Location location, ItemStack itemStack) {
+        return null;
+    }
+
+    /**
+     * Drops an item at the specified {@link Location} with a random offset
+     * Note that functions will run before the entity is spawned
+     *
+     * @param location Location to drop the item
+     * @param item     ItemStack to drop
+     * @param function the function to be run before the entity is spawned.
+     * @return ItemDrop entity created as a result of this method
+     */
+    @Override
+    public Item dropItemNaturally(Location location, ItemStack item, Consumer<Item> function) {
         return null;
     }
 
@@ -409,11 +417,6 @@ public class ForgeBukkitWorld implements World {
      */
     @Override
     public <T extends AbstractArrow> T spawnArrow(Location location, Vector direction, float speed, float spread, Class<T> clazz) {
-        return null;
-    }
-
-    @Override
-    public <T extends Arrow> T spawnArrow(Location location, Vector vector, float v, float v1, Class<T> aClass) {
         return null;
     }
 
@@ -1063,17 +1066,6 @@ public class ForgeBukkitWorld implements World {
      */
     @Override
     public FallingBlock spawnFallingBlock(Location location, Material material, byte b) throws IllegalArgumentException {
-        return null;
-    }
-
-    /**
-     * @param location
-     * @param i
-     * @param b
-     * @deprecated
-     */
-    @Override
-    public FallingBlock spawnFallingBlock(Location location, int i, byte b) throws IllegalArgumentException {
         return null;
     }
 
@@ -1873,25 +1865,6 @@ public class ForgeBukkitWorld implements World {
 
     }
 
-    /**
-     * Sends this recipient a Plugin Message on the specified outgoing
-     * channel.
-     * <p>
-     * The message may not be larger than {@link Messenger#MAX_MESSAGE_SIZE}
-     * bytes, and the plugin must be registered to send messages on the
-     * specified channel.
-     *
-     * @param source  The plugin that sent this message.
-     * @param channel The channel to send this message on.
-     * @param message The raw message to send.
-     * @throws IllegalArgumentException      Thrown if the source plugin is
-     *                                       disabled.
-     * @throws IllegalArgumentException      Thrown if source, channel or message
-     *                                       is null.
-     * @throws MessageTooLargeException      Thrown if the message is too big.
-     * @throws ChannelNotRegisteredException Thrown if the channel is not
-     *                                       registered for this plugin.
-     */
     @Override
     public void sendPluginMessage(Plugin source, String channel, byte[] message) {
 

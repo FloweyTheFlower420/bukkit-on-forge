@@ -52,7 +52,7 @@ public class ForgeBukkitDragonBattle extends Wrapper<DragonFightManager> impleme
         try {
             return (boolean) ForgeBukkit.generatePortal.invoke(getHandle(), withPortals);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            ForgeBukkit.LOGGER.fatal("Reflection exec failed!", e);
+            ForgeBukkit.logger.fatal("Reflection exec failed!", e);
         }
 
         return true;
