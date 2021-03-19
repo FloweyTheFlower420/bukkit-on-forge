@@ -1,6 +1,7 @@
 package com.floweytf.forgebukkit;
 
 import com.floweytf.forgebukkit.entity.ForgeBukkitPlayer;
+import com.floweytf.forgebukkit.metadata.EntityMetadataStore;
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
@@ -44,6 +45,7 @@ public class ForgeBukkitServer implements Server {
     private static final String bukkitVersion;
     private YamlConfiguration configuration;
     private final MinecraftServer server;
+    private EntityMetadataStore entityMetadata;
 
     public static ForgeBukkitServer wrap(MinecraftServer server) {
         return new ForgeBukkitServer(server);
@@ -70,14 +72,6 @@ public class ForgeBukkitServer implements Server {
 
     public EntityMetadataStore getEntityMetadata() {
         return entityMetadata;
-    }
-
-    public PlayerMetadataStore getPlayerMetadata() {
-        return playerMetadata;
-    }
-
-    public WorldMetadataStore getWorldMetadata() {
-        return worldMetadata;
     }
 
     ForgeBukkitServer(MinecraftServer server) {
@@ -235,552 +229,552 @@ public class ForgeBukkitServer implements Server {
         return 0;
     }
 
-    
+
     @Override
     public Player getPlayer(String name) {
         return ForgeBukkitPlayer.wrap(server.getPlayerList().getPlayerByUsername(name);
     }
 
-    
+
     @Override
     public Player getPlayerExact(String name) {
         return null;
     }
 
-    
+
     @Override
     public List<Player> matchPlayer(String name) {
     }
 
-    
+
     @Override
     public Player getPlayer(UUID id) {
         return ForgeBukkitPlayer.wrap(server.getPlayerList().getPlayerByUUID(name);
     }
 
-    
+
     @Override
     public PluginManager getPluginManager() {
         return null;
     }
 
-    
+
     @Override
     public BukkitScheduler getScheduler() {
         return null;
     }
 
-    
+
     @Override
     public ServicesManager getServicesManager() {
         return null;
     }
 
-    
+
     @Override
     public List<World> getWorlds() {
         return null;
     }
 
-    
+
     @Override
     public World createWorld(WorldCreator creator) {
         return null;
     }
 
-    
+
     @Override
     public boolean unloadWorld(String name, boolean save) {
         return false;
     }
 
-    
+
     @Override
     public boolean unloadWorld(World world, boolean save) {
         return false;
     }
 
-    
+
     @Override
     public World getWorld(String name) {
         return null;
     }
 
-    
+
     @Override
     public World getWorld(UUID uid) {
         return null;
     }
 
-    
+
     @Override
     public MapView getMap(int id) {
         return null;
     }
 
-    
+
     @Override
     public MapView createMap(World world) {
         return null;
     }
 
-    
+
     @Override
     public ItemStack createExplorerMap(World world, Location location, StructureType structureType) {
         return null;
     }
 
-    
+
     @Override
     public ItemStack createExplorerMap(World world, Location location, StructureType structureType, int radius, boolean findUnexplored) {
         return null;
     }
 
-    
+
     @Override
     public void reload() {
 
     }
 
-    
+
     @Override
     public void reloadData() {
 
     }
 
-    
+
     @Override
     public Logger getLogger() {
         return null;
     }
 
-    
+
     @Override
     public PluginCommand getPluginCommand(String name) {
         return null;
     }
 
-    
+
     @Override
     public void savePlayers() {
 
     }
 
-    
+
     @Override
     public boolean dispatchCommand(CommandSender sender, String commandLine) throws CommandException {
         return false;
     }
 
-    
+
     @Override
     public boolean addRecipe(Recipe recipe) {
         return false;
     }
 
-    
+
     @Override
     public List<Recipe> getRecipesFor(ItemStack result) {
         return null;
     }
 
-    
+
     @Override
     public Recipe getRecipe(NamespacedKey recipeKey) {
         return null;
     }
 
-    
+
     @Override
     public Iterator<Recipe> recipeIterator() {
         return null;
     }
 
-    
+
     @Override
     public void clearRecipes() {
 
     }
 
-    
+
     @Override
     public void resetRecipes() {
 
     }
 
-    
+
     @Override
     public boolean removeRecipe(NamespacedKey key) {
         return false;
     }
 
-    
+
     @Override
     public Map<String, String[]> getCommandAliases() {
         return null;
     }
 
-    
+
     @Override
     public int getSpawnRadius() {
         return 0;
     }
 
-    
+
     @Override
     public void setSpawnRadius(int value) {
 
     }
 
-    
+
     @Override
     public boolean getOnlineMode() {
         return false;
     }
 
-    
+
     @Override
     public boolean getAllowFlight() {
         return false;
     }
 
-    
+
     @Override
     public boolean isHardcore() {
         return false;
     }
 
-    
+
     @Override
     public void shutdown() {
 
     }
 
-    
+
     @Override
     public int broadcast(String message, String permission) {
         return 0;
     }
 
-    
+
     @Override
     public OfflinePlayer getOfflinePlayer(String name) {
         return null;
     }
 
-    
+
     @Override
     public OfflinePlayer getOfflinePlayer(UUID id) {
         return null;
     }
 
-    
+
     @Override
     public Set<String> getIPBans() {
         return null;
     }
 
-    
+
     @Override
     public void banIP(String address) {
 
     }
 
-    
+
     @Override
     public void unbanIP(String address) {
 
     }
 
-    
+
     @Override
     public Set<OfflinePlayer> getBannedPlayers() {
         return null;
     }
 
-    
+
     @Override
     public BanList getBanList(BanList.Type type) {
         return null;
     }
 
-    
+
     @Override
     public Set<OfflinePlayer> getOperators() {
         return null;
     }
 
-    
+
     @Override
     public GameMode getDefaultGameMode() {
         return null;
     }
 
-    
+
     @Override
     public void setDefaultGameMode(GameMode mode) {
 
     }
 
-    
+
     @Override
     public ConsoleCommandSender getConsoleSender() {
         return null;
     }
 
-    
+
     @Override
     public File getWorldContainer() {
         return null;
     }
 
-    
+
     @Override
     public OfflinePlayer[] getOfflinePlayers() {
         return new OfflinePlayer[0];
     }
 
-    
+
     @Override
     public Messenger getMessenger() {
         return null;
     }
 
-    
+
     @Override
     public HelpMap getHelpMap() {
         return null;
     }
 
-    
+
     @Override
     public Inventory createInventory(InventoryHolder owner, InventoryType type) {
         return null;
     }
 
-    
+
     @Override
     public Inventory createInventory(InventoryHolder owner, InventoryType type, String title) {
         return null;
     }
 
-    
+
     @Override
     public Inventory createInventory(InventoryHolder owner, int size) throws IllegalArgumentException {
         return null;
     }
 
-    
+
     @Override
     public Inventory createInventory(InventoryHolder owner, int size, String title) throws IllegalArgumentException {
         return null;
     }
 
-    
+
     @Override
     public Merchant createMerchant(String title) {
         return null;
     }
 
-    
+
     @Override
     public int getMonsterSpawnLimit() {
         return 0;
     }
 
-    
+
     @Override
     public int getAnimalSpawnLimit() {
         return 0;
     }
 
-    
+
     @Override
     public int getWaterAnimalSpawnLimit() {
         return 0;
     }
 
-    
+
     @Override
     public int getWaterAmbientSpawnLimit() {
         return 0;
     }
 
-    
+
     @Override
     public int getAmbientSpawnLimit() {
         return 0;
     }
 
-    
+
     @Override
     public boolean isPrimaryThread() {
         return false;
     }
 
-    
+
     @Override
     public String getMotd() {
         return null;
     }
 
-    
+
     @Override
     public String getShutdownMessage() {
         return null;
     }
 
-    
+
     @Override
     public Warning.WarningState getWarningState() {
         return null;
     }
 
-    
+
     @Override
     public ItemFactory getItemFactory() {
         return null;
     }
 
-    
+
     @Override
     public ScoreboardManager getScoreboardManager() {
         return null;
     }
 
-    
+
     @Override
     public CachedServerIcon getServerIcon() {
         return null;
     }
 
-    
+
     @Override
     public CachedServerIcon loadServerIcon(File file) throws IllegalArgumentException, Exception {
         return null;
     }
 
-    
+
     @Override
     public CachedServerIcon loadServerIcon(BufferedImage image) throws IllegalArgumentException, Exception {
         return null;
     }
 
-    
+
     @Override
     public void setIdleTimeout(int threshold) {
 
     }
 
-    
+
     @Override
     public int getIdleTimeout() {
         return 0;
     }
 
-    
+
     @Override
     public ChunkGenerator.ChunkData createChunkData(World world) {
         return null;
     }
 
-    
+
     @Override
     public BossBar createBossBar(String title, BarColor color, BarStyle style, BarFlag... flags) {
         return null;
     }
 
-    
+
     @Override
     public KeyedBossBar createBossBar(NamespacedKey key, String title, BarColor color, BarStyle style, BarFlag... flags) {
         return null;
     }
 
-    
+
     @Override
     public Iterator<KeyedBossBar> getBossBars() {
         return null;
     }
 
-    
+
     @Override
     public KeyedBossBar getBossBar(NamespacedKey key) {
         return null;
     }
 
-    
+
     @Override
     public boolean removeBossBar(NamespacedKey key) {
         return false;
     }
 
-    
+
     @Override
     public Entity getEntity(UUID uuid) {
         return null;
     }
 
-    
+
     @Override
     public Advancement getAdvancement(NamespacedKey key) {
         return null;
     }
 
-    
+
     @Override
     public Iterator<Advancement> advancementIterator() {
         return null;
     }
 
-    
+
     @Override
     public BlockData createBlockData(Material material) {
         return null;
     }
 
-    
+
     @Override
     public BlockData createBlockData(Material material, Consumer<BlockData> consumer) {
         return null;
     }
 
-    
+
     @Override
     public BlockData createBlockData(String data) throws IllegalArgumentException {
         return null;
     }
 
-    
+
     @Override
     public BlockData createBlockData(Material material, String data) throws IllegalArgumentException {
         return null;
     }
 
-    
+
     @Override
     public <T extends Keyed> Tag<T> getTag(String registry, NamespacedKey tag, Class<T> clazz) {
         return null;
     }
 
-    
+
     @Override
     public <T extends Keyed> Iterable<Tag<T>> getTags(String registry, Class<T> clazz) {
         return null;
     }
 
-    
+
     @Override
     public LootTable getLootTable(NamespacedKey key) {
         return null;
     }
 
-    
+
     @Override
     public List<Entity> selectEntities(CommandSender sender, String selector) throws IllegalArgumentException {
         return null;
     }
 
-    
+
     @Override
     public UnsafeValues getUnsafe() {
         return null;
@@ -791,13 +785,13 @@ public class ForgeBukkitServer implements Server {
         return null;
     }
 
-    
+
     @Override
     public void sendPluginMessage(Plugin source, String channel, byte[] message) {
 
     }
 
-    
+
     @Override
     public Set<String> getListeningPluginChannels() {
         return null;

@@ -24,6 +24,10 @@ public class ForgeBukkit
     public static Method sendUpdate = ObfuscationReflectionHelper.findMethod(ServerBossInfo.class, "func_186759_a ", SUpdateBossInfoPacket.Operation.class);
     public static String version = "1.0";
 
+    public static void invokeFatal(Throwable e) {
+        logger.fatal("Failed to invoke method!", e);
+    }
+
     public ForgeBukkit() {
         logger.info("ForgeBukkit started!");
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::server);

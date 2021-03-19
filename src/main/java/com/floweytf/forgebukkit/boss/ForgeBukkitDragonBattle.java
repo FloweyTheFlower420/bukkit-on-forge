@@ -24,36 +24,36 @@ public class ForgeBukkitDragonBattle extends Wrapper<DragonFightManager> impleme
 
     @Override
     public EnderDragon getEnderDragon() {
-        Entity entity = getAccessor().getWorld().getEntityByUuid(getAccessor().getDragonUUID());
+        Entity entity = getHandle().entity.getEntityByUuid(getHandle().dragonUniqueId);
         return (entity != null) ? (EnderDragon) ForgeBukkitEntity.wrap(entity) : null;
     }
 
     @Override
     @Nonnull
     public BossBar getBossBar() {
-        return new ForgeBukkitBossBar(getAccessor().getBossInfo());
+        return new ForgeBukkitBossBar(getHandle().bossInfo);
     }
 
     @Override
     public Location getEndPortalLocation() {
-        if (getAccessor().getExitPortal() == null) {
+        if (getHandle().exitPortalLocation == null)
             return null;
-        }
 
-        return new Location(ForgeBukkitWorld.getWorldWrapper(getAccessor().getWorld()), getAccessor().getExitPortal().getX(), getAccessor().getExitPortal().getY(), getAccessor().getExitPortal().getZ());
+        return new Location(
+            ForgeBukkitWorld.getWorldWrapper(getHandle().world),
+            getHandle().exitPortalLocation.getX(),
+            getHandle().exitPortalLocation.getY(),
+            getHandle().exitPortalLocation.getZ()
+        );
     }
 
     @Override
     public boolean generateEndPortal(boolean withPortals) {
-        if (getAccessor().getExitPortal() != null || getAccessor().getPortalPattern() != null) {
+        if (getHandle().exitPortalLocation != null || getHandle().portalPattern != null) {
             return false;
         }
 
-        try {
-            return (boolean) ForgeBukkit.generatePortal.invoke(getHandle(), withPortals);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            ForgeBukkit.logger.fatal("Reflection exec failed!", e);
-        }
+        return getHandle().generatePortal(withPortals);
 
         return true;
     }
@@ -71,18 +71,17 @@ public class ForgeBukkitDragonBattle extends Wrapper<DragonFightManager> impleme
     @Override
     @Nonnull
     public RespawnPhase getRespawnPhase() {
-        return toBukkitRespawnPhase(getAccessor().getSpawnState());
+        return toBukkitRespawnPhase(getHandle().respawnState);
     }
 
     @Override
     public boolean setRespawnPhase(@Nonnull RespawnPhase phase) {
         Preconditions.checkArgument(phase != null && phase != RespawnPhase.NONE, "Invalid respawn phase provided: %s", phase);
 
-        if (getAccessor().getSpawnState()== null) {
+        if (getHandle().respawnState == null)
             return false;
-        }
 
-        getAccessor().setSpawnState(toMcRespawnPhase(phase));
+        getHandle().respawnState = toMcRespawnPhase(phase);
         return true;
     }
 
@@ -107,9 +106,5 @@ public class ForgeBukkitDragonBattle extends Wrapper<DragonFightManager> impleme
 
     private DragonSpawnState toMcRespawnPhase(RespawnPhase phase) {
         return (phase != RespawnPhase.NONE) ? DragonSpawnState.values()[phase.ordinal()] : null;
-    }
-
-    private DragonFightManagerMixin getAccessor() {
-        return (DragonFightManagerMixin) getHandle();
     }
 }

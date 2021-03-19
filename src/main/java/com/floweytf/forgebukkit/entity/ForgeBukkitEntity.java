@@ -1,19 +1,20 @@
 package com.floweytf.forgebukkit.entity;
 
+import com.floweytf.forgebukkit.ForgeBukkit;
 import com.floweytf.forgebukkit.ForgeBukkitServer;
 import com.floweytf.forgebukkit.ForgeBukkitWorld;
 import com.floweytf.forgebukkit.Wrapper;
-import com.google.common.base.Function;
+import com.floweytf.forgebukkit.persistence.ForgeBukkitPersistentDataContainer;
+import com.floweytf.forgebukkit.persistence.ForgeBukkitPersistentDataTypeRegistry;
+import com.floweytf.forgebukkit.util.ForgeBukkitChatMessage;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.projectile.ArrowEntity;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Server;
@@ -24,30 +25,42 @@ import org.bukkit.entity.Pose;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.metadata.MetadataValue;
-import org.bukkit.permissions.PermissibleBase;
-import org.bukkit.permissions.Permission;
-import org.bukkit.permissions.PermissionAttachment;
-import org.bukkit.permissions.PermissionAttachmentInfo;
-import org.bukkit.permissions.ServerOperator;
+import org.bukkit.permissions.*;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.bukkit.entity.Entity {
+    public static Method getFlag = ObfuscationReflectionHelper.findMethod(Entity.class, "func_70083_f", int.class);
+    public static Method setFlag = ObfuscationReflectionHelper.findMethod(Entity.class, "func_70052_a", int.class, boolean.class);
+
+
     private static PermissibleBase perm;
-    private static final CraftPersistentDataTypeRegistry DATA_TYPE_REGISTRY = new CraftPersistentDataTypeRegistry();
+    private static final ForgeBukkitPersistentDataTypeRegistry DATA_TYPE_REGISTRY = new ForgeBukkitPersistentDataTypeRegistry();
 
     protected final ForgeBukkitServer server;
     private EntityDamageEvent lastDamageEvent;
-    private final CraftPersistentDataContainer persistentDataContainer = new CraftPersistentDataContainer(DATA_TYPE_REGISTRY);
+    private final ForgeBukkitPersistentDataContainer persistentDataContainer = new ForgeBukkitPersistentDataContainer(DATA_TYPE_REGISTRY);
 
     public ForgeBukkitEntity(final ForgeBukkitServer server, final Entity handle) {
         super(handle);
         this.server = server;
     }
 
-    public static ForgeBukkitEntity wrap(ForgeBukkitServer server, Entity entity) { return null; }
+    public static ForgeBukkitEntity wrap(Entity entity) {
+        ForgeBukkitServer server = ForgeBukkitServer.wrap(entity.world.getServer());
+        return null;
+    }
 
     /*
     public static ForgeBukkitEntity wrap(ForgeBukkitServer server, Entity entity) {
@@ -251,6 +264,7 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
      */
 
     @Override
+    @NotNull
     public Location getLocation() {
         return new Location(
                 getWorld(),
@@ -277,12 +291,13 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
     }
 
     @Override
+    @NotNull
     public Vector getVelocity() {
         return new Vector(getHandle().getMotion().x, getHandle().getMotion().y, getHandle().getMotion().z);
     }
 
     @Override
-    public void setVelocity(Vector velocity) {
+    public void setVelocity(@NotNull Vector velocity) {
         Preconditions.checkNotNull(velocity );
         velocity.checkFinite();
         getHandle().setMotion(velocity.getX(), velocity.getY(), velocity.getZ());
@@ -300,6 +315,7 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
     }
 
     @Override
+    @NotNull
     public BoundingBox getBoundingBox() {
         return new BoundingBox(
                 getHandle().getBoundingBox().minX,
@@ -322,6 +338,7 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
     }
 
     @Override
+    @NotNull
     public World getWorld() {
         return Objects.requireNonNull(ForgeBukkitWorld.getWorldWrapper(getHandle().world));
     }
@@ -344,12 +361,12 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
     }
 
     @Override
-    public boolean teleport(Location location) {
+    public boolean teleport(@NotNull Location location) {
         return teleport(location, TeleportCause.PLUGIN);
     }
 
     @Override
-    public boolean teleport(Location location, TeleportCause cause) {
+    public boolean teleport(Location location, @NotNull TeleportCause cause) {
         Preconditions.checkArgument(location != null, "location");
         location.checkFinite();
 
@@ -361,12 +378,12 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
 
         // Let the server handle cross world teleports
         if (!location.getWorld().equals(getWorld())) {
-            getHandle().teleportTo(((CraftWorld) location.getWorld()).getHandle(), new BlockPosition(location.getX(), location.getY(), location.getZ()));
+            getHandle().teleportTo(((ForgeBukkitWorld) location.getWorld()).getHandle(), new BlockPos(location.getX(), location.getY(), location.getZ()));
             return true;
         }
 
         // entity.setLocation() throws no event, and so cannot be cancelled
-        getHandle().setLocation(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+        getHandle().setLocationAndAngles(location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
         // SPIGOT-619: Force sync head rotation also
         getHandle().setHeadRotation(location.getYaw(), 0);
 
@@ -379,18 +396,19 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
     }
 
     @Override
-    public boolean teleport(org.bukkit.entity.Entity destination, TeleportCause cause) {
+    public boolean teleport(org.bukkit.entity.Entity destination, @NotNull TeleportCause cause) {
         return teleport(destination.getLocation(), cause);
     }
 
     @Override
+    @NotNull
     public List<org.bukkit.entity.Entity> getNearbyEntities(double x, double y, double z) {
         List<Entity> notchEntityList = getHandle().world.getEntities(entity, entity.getBoundingBox().grow(x, y, z), null);
         List<org.bukkit.entity.Entity> bukkitEntityList = new java.util.ArrayList<org.bukkit.entity.Entity>(notchEntityList.size());
 
-        for (Entity e : notchEntityList) {
-            bukkitEntityList.add(e.getBukkitEntity());
-        }
+        for (Entity e : notchEntityList)
+            bukkitEntityList.add(wrap(e));
+
         return bukkitEntityList;
     }
 
@@ -431,6 +449,7 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
     }
 
     @Override
+    @NotNull
     public Server getServer() {
         return server;
     }
@@ -455,11 +474,11 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
 
     @Override
     public org.bukkit.entity.Entity getPassenger() {
-        return isEmpty() ? null : wrap(ForgeBukkitServer.wrap(getHandle().world.getServer()), getHandle().getPassengers().get(0));
+        return isEmpty() ? null : wrap(getHandle().getPassengers().get(0));
     }
 
     @Override
-    public boolean setPassenger(org.bukkit.entity.Entity passenger) {
+    public boolean setPassenger(@NotNull org.bukkit.entity.Entity passenger) {
         Preconditions.checkArgument(!this.equals(passenger), "Entity cannot ride itself.");
         if (passenger instanceof ForgeBukkitEntity) {
             eject();
@@ -469,19 +488,20 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
     }
 
     @Override
+    @NotNull
     public List<org.bukkit.entity.Entity> getPassengers() {
-        return getHandle().getPassengers().stream().map(entity -> wrap(ForgeBukkitServer.wrap(entity.getServer()), entity)).collect(Collectors.toList());
+        return getHandle().getPassengers().stream().map(ForgeBukkitEntity::wrap).collect(Collectors.toList());
     }
 
     @Override
-    public boolean addPassenger(org.bukkit.entity.Entity passenger) {
+    public boolean addPassenger(@NotNull org.bukkit.entity.Entity passenger) {
         Preconditions.checkArgument(passenger != null, "passenger == null");
 
         return ((ForgeBukkitEntity) passenger).getHandle().startRiding(getHandle(), true);
     }
 
     @Override
-    public boolean removePassenger(org.bukkit.entity.Entity passenger) {
+    public boolean removePassenger(@NotNull org.bukkit.entity.Entity passenger) {
         Preconditions.checkArgument(passenger != null, "passenger == null");
 
         ((ForgeBukkitEntity) passenger).getHandle().stopRiding();
@@ -524,6 +544,7 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
     }
 
     @Override
+    @NotNull
     public UUID getUniqueId() {
         return getHandle().getUniqueID();
     }
@@ -551,7 +572,7 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
     }
 
     public void setHandle(final Entity entity) {
-        setHandle(entity);
+        super.setHandle(entity);
     }
 
     @Override
@@ -580,22 +601,23 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
     }
 
     @Override
-    public void setMetadata(String metadataKey, MetadataValue newMetadataValue) {
+    public void setMetadata(@NotNull String metadataKey, @NotNull MetadataValue newMetadataValue) {
         server.getEntityMetadata().setMetadata(this, metadataKey, newMetadataValue);
     }
 
     @Override
-    public List<MetadataValue> getMetadata(String metadataKey) {
+    @NotNull
+    public List<MetadataValue> getMetadata(@NotNull String metadataKey) {
         return server.getEntityMetadata().getMetadata(this, metadataKey);
     }
 
     @Override
-    public boolean hasMetadata(String metadataKey) {
+    public boolean hasMetadata(@NotNull String metadataKey) {
         return server.getEntityMetadata().hasMetadata(this, metadataKey);
     }
 
     @Override
-    public void removeMetadata(String metadataKey, Plugin owningPlugin) {
+    public void removeMetadata(@NotNull String metadataKey, @NotNull Plugin owningPlugin) {
         server.getEntityMetadata().removeMetadata(this, metadataKey, owningPlugin);
     }
 
@@ -616,11 +638,10 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
 
     @Override
     public org.bukkit.entity.Entity getVehicle() {
-        if (!isInsideVehicle()) {
+        if (!isInsideVehicle())
             return null;
-        }
 
-        return getHandle().getVehicle().getBukkitEntity();
+        return wrap(getHandle().getRidingEntity());
     }
 
     @Override
@@ -630,18 +651,17 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
             name = name.substring(0, 256);
         }
 
-        getHandle().setCustomName(CraftChatMessage.fromStringOrNull(name));
+        getHandle().setCustomName(ForgeBukkitChatMessage.fromStringOrNull(name));
     }
 
     @Override
     public String getCustomName() {
-        IChatBaseComponent name = getHandle().getCustomName();
+        ITextComponent name = getHandle().getCustomName();
 
-        if (name == null) {
+        if (name == null)
             return null;
-        }
 
-        return CraftChatMessage.fromComponent(name);
+        return ForgeBukkitChatMessage.fromComponent(name);
     }
 
     @Override
@@ -651,7 +671,7 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
 
     @Override
     public boolean isCustomNameVisible() {
-        return getHandle().getCustomNameVisible();
+        return getHandle().isCustomNameVisible();
     }
 
     @Override
@@ -675,52 +695,59 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
     }
 
     @Override
+    @NotNull
     public String getName() {
-        return CraftChatMessage.fromComponent(getHandle().getDisplayName());
+        return ForgeBukkitChatMessage.fromComponent(getHandle().getDisplayName());
     }
 
     @Override
+    @NotNull
     public boolean isPermissionSet(String name) {
         return getPermissibleBase().isPermissionSet(name);
     }
 
     @Override
+    @NotNull
     public boolean isPermissionSet(Permission perm) {
-        return CraftEntity.getPermissibleBase().isPermissionSet(perm);
+        return ForgeBukkitEntity.getPermissibleBase().isPermissionSet(perm);
     }
 
     @Override
+    @NotNull
     public boolean hasPermission(String name) {
         return getPermissibleBase().hasPermission(name);
     }
 
     @Override
+    @NotNull
     public boolean hasPermission(Permission perm) {
         return getPermissibleBase().hasPermission(perm);
     }
 
     @Override
-    public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value) {
+    @NotNull
+    public PermissionAttachment addAttachment(@NotNull Plugin plugin, @NotNull String name, boolean value) {
         return getPermissibleBase().addAttachment(plugin, name, value);
     }
 
     @Override
-    public PermissionAttachment addAttachment(Plugin plugin) {
+    @NotNull
+    public PermissionAttachment addAttachment(@NotNull Plugin plugin) {
         return getPermissibleBase().addAttachment(plugin);
     }
 
     @Override
-    public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value, int ticks) {
+    public PermissionAttachment addAttachment(@NotNull Plugin plugin, @NotNull String name, boolean value, int ticks) {
         return getPermissibleBase().addAttachment(plugin, name, value, ticks);
     }
 
     @Override
-    public PermissionAttachment addAttachment(Plugin plugin, int ticks) {
+    public PermissionAttachment addAttachment(@NotNull Plugin plugin, int ticks) {
         return getPermissibleBase().addAttachment(plugin, ticks);
     }
 
     @Override
-    public void removeAttachment(PermissionAttachment attachment) {
+    public void removeAttachment(@NotNull PermissionAttachment attachment) {
         getPermissibleBase().removeAttachment(attachment);
     }
 
@@ -730,6 +757,7 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
     }
 
     @Override
+    @NotNull
     public Set<PermissionAttachmentInfo> getEffectivePermissions() {
         return getPermissibleBase().getEffectivePermissions();
     }
@@ -746,16 +774,20 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
 
     @Override
     public void setGlowing(boolean flag) {
-        getHandle().glowing = flag;
+        getHandle().setGlowing(flag);
         Entity e = getHandle();
-        if (e.getFlag(6) != flag) {
-            e.setFlag(6, flag);
+        try {
+            if ((boolean) getFlag.invoke(e, 6) != flag) {
+                setFlag.invoke(e, 6, flag);
+            }
+        } catch (IllegalAccessException | InvocationTargetException exception) {
+            ForgeBukkit.logger.fatal("Unable to exec", exception);
         }
     }
 
     @Override
     public boolean isGlowing() {
-        return getHandle().glowing;
+        return getHandle().isGlowing();
     }
 
     @Override
@@ -780,7 +812,7 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
 
     @Override
     public boolean hasGravity() {
-        return !getHandle().isNoGravity();
+        return !getHandle().hasNoGravity();
     }
 
     @Override
@@ -790,7 +822,7 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
 
     @Override
     public int getPortalCooldown() {
-        return getHandle().portalCooldown;
+        return getHandle().getPortalCooldown();
     }
 
     @Override
@@ -799,67 +831,69 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
     }
 
     @Override
+    @NotNull
     public Set<String> getScoreboardTags() {
         return getHandle().getScoreboardTags();
     }
 
     @Override
-    public boolean addScoreboardTag(String tag) {
+    public boolean addScoreboardTag(@NotNull String tag) {
         return getHandle().addScoreboardTag(tag);
     }
 
     @Override
-    public boolean removeScoreboardTag(String tag) {
+    public boolean removeScoreboardTag(@NotNull String tag) {
         return getHandle().removeScoreboardTag(tag);
     }
 
     @Override
+    @NotNull
     public PistonMoveReaction getPistonMoveReaction() {
-        return PistonMoveReaction.getById(getHandle().getPushReaction().ordinal());
+        return Objects.requireNonNull(PistonMoveReaction.getById(getHandle().getPushReaction().ordinal()));
     }
 
     @Override
+    @NotNull
     public BlockFace getFacing() {
         // Use this method over getDirection because it handles boats and minecarts.
         return CraftBlock.notchToBlockFace(getHandle().getAdjustedDirection());
     }
 
     @Override
-    public CraftPersistentDataContainer getPersistentDataContainer() {
+    @NotNull
+    public ForgeBukkitPersistentDataContainer getPersistentDataContainer() {
         return persistentDataContainer;
     }
 
     @Override
+    @NotNull
     public Pose getPose() {
         return Pose.values()[getHandle().getPose().ordinal()];
     }
 
-    public void storeBukkitValues(NBTTagCompound c) {
-        if (!this.persistentDataContainer.isEmpty()) {
-            c.set("BukkitValues", this.persistentDataContainer.toTagCompound());
-        }
+    public void write(CompoundNBT c) {
+        if (!this.persistentDataContainer.isEmpty())
+            c.put("BukkitValues", this.persistentDataContainer.toTagCompound());
     }
 
-    public void readBukkitValues(NBTTagCompound c) {
-        NBTBase base = c.get("BukkitValues");
-        if (base instanceof NBTTagCompound) {
-            this.persistentDataContainer.putAll((NBTTagCompound) base);
-        }
+    public void readBukkitValues(CompoundNBT c) {
+        INBT base = c.get("BukkitValues");
+        if (base instanceof CompoundNBT)
+            this.persistentDataContainer.putAll((CompoundNBT) base);
     }
 
-    protected NBTTagCompound save() {
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
+    protected CompoundNBT save() {
+        CompoundNBT compoundNBT = new CompoundNBT();
 
-        nbttagcompound.setString("id", getHandle().getSaveID());
-        getHandle().save(nbttagcompound);
+        compoundNBT.putString("id", getHandle().getEntityString());
+        getHandle().writeWithoutTypeId(compoundNBT);
 
-        return nbttagcompound;
+        return compoundNBT;
     }
 
     private static PermissibleBase getPermissibleBase() {
         if (perm == null) {
             perm = new PermissibleBase(new ServerOperator() {
-
                 @Override
                 public boolean isOp() {
                     return false;

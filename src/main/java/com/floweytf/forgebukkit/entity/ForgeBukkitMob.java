@@ -2,7 +2,6 @@ package com.floweytf.forgebukkit.entity;
 
 import com.floweytf.forgebukkit.ForgeBukkit;
 import com.floweytf.forgebukkit.ForgeBukkitServer;
-import com.floweytf.forgebukkit.mixins.MobEntityMixin;
 import com.floweytf.forgebukkit.util.ForgeBukkitNamespacedKey;
 import net.minecraft.entity.MobEntity;
 import org.bukkit.Bukkit;
@@ -89,7 +88,7 @@ public abstract class ForgeBukkitMob extends ForgeBukkitLivingEntity implements 
 
     @Override
     public void setLootTable(LootTable table) {
-        ((MobEntityMixin)getHandle()).setLootTableKey((table == null) ? null : ForgeBukkitNamespacedKey.toMinecraft(table.getKey()));
+        getHandle().deathLootTable = ((table == null) ? null : ForgeBukkitNamespacedKey.toMinecraft(table.getKey()));
     }
 
     @Override
@@ -100,10 +99,10 @@ public abstract class ForgeBukkitMob extends ForgeBukkitLivingEntity implements 
 
     @Override
     public void setSeed(long seed) {
-        ((MobEntityMixin)getHandle()).setLootTableSeed(seed);
+        getHandle().deathLootTableSeed = seed;
     }
 
     public long getSeed() {
-        return ((MobEntityMixin)getHandle()).getLootTableSeed();
+        return getHandle().deathLootTableSeed;
     }
 }

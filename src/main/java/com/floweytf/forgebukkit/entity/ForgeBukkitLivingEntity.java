@@ -1,12 +1,19 @@
 package com.floweytf.forgebukkit.entity;
 
+import com.floweytf.forgebukkit.ForgeBukkit;
 import com.floweytf.forgebukkit.ForgeBukkitServer;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
+import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.item.ArmorStandEntity;
+import net.minecraft.potion.Effect;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Hand;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.apache.commons.lang.Validate;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
@@ -27,11 +34,19 @@ import org.bukkit.potion.PotionType;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.sql.PreparedStatement;
 import java.util.*;
 
 public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements LivingEntity {
+    private static final Method damageEntity = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "func_70665_d", DamageSource.class, float.class);
     private CraftEntityEquipment equipment;
+    boolean canPickUpLoot = false;
+    public boolean collides = true;
+    public Set<UUID> collidableExemptions = new HashSet<>();
 
     public ForgeBukkitLivingEntity(final ForgeBukkitServer server, final net.minecraft.entity.LivingEntity entity) {
         super(server, entity);
@@ -126,17 +141,20 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
     }
 
     @Override
+    @NotNull
     public List<Block> getLineOfSight(Set<Material> transparent, int maxDistance) {
         return getLineOfSight(transparent, maxDistance, 0);
     }
 
     @Override
+    @NotNull
     public Block getTargetBlock(Set<Material> transparent, int maxDistance) {
         List<Block> blocks = getLineOfSight(transparent, maxDistance, 1);
         return blocks.get(0);
     }
 
     @Override
+    @NotNull
     public List<Block> getLastTwoTargetBlocks(Set<Material> transparent, int maxDistance) {
         return getLineOfSight(transparent, maxDistance, 2);
     }
@@ -147,7 +165,7 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
     }
 
     @Override
-    public Block getTargetBlockExact(int maxDistance, FluidCollisionMode fluidCollisionMode) {
+    public Block getTargetBlockExact(int maxDistance, @NotNull FluidCollisionMode fluidCollisionMode) {
         RayTraceResult hitResult = this.rayTraceBlocks(maxDistance, fluidCollisionMode);
         return (hitResult != null ? hitResult.getHitBlock() : null);
     }
@@ -158,7 +176,7 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
     }
 
     @Override
-    public RayTraceResult rayTraceBlocks(double maxDistance, FluidCollisionMode fluidCollisionMode) {
+    public RayTraceResult rayTraceBlocks(double maxDistance, @NotNull FluidCollisionMode fluidCollisionMode) {
         Location eyeLocation = this.getEyeLocation();
         Vector direction = eyeLocation.getDirection();
         return this.getWorld().rayTraceBlocks(eyeLocation, direction, maxDistance, fluidCollisionMode, false);
@@ -222,10 +240,16 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
         else if (source instanceof LivingEntity)
             reason = DamageSource.causeMobDamage(((ForgeBukkitLivingEntity) source).getHandle());
 
-        getHandle().damageEntity (reason, (float) amount);
+        try {
+            damageEntity.invoke(getHandle(), reason, (float) amount);
+        }
+        catch (IllegalAccessException | InvocationTargetException e) {
+            ForgeBukkit.logger.fatal(e);
+        }
     }
 
     @Override
+    @NotNull
     public Location getEyeLocation() {
         Location loc = getLocation();
         loc.setY(loc.getY() + getEyeHeight());
@@ -234,12 +258,12 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
 
     @Override
     public int getMaximumNoDamageTicks() {
-        return getHandle().hurtResistantTime;
+        return getHandle().maxHurtResistantTime;
     }
 
     @Override
     public void setMaximumNoDamageTicks(int ticks) {
-        getHandle().hurtResistantTime = ticks;
+        getHandle().maxHurtResistantTime = ticks;
     }
 
     @Override
@@ -254,12 +278,12 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
 
     @Override
     public int getNoDamageTicks() {
-        return getHandle().noDamageTicks;
+        return getHandle().hurtResistantTime;
     }
 
     @Override
     public void setNoDamageTicks(int ticks) {
-        getHandle().noDamageTicks = ticks;
+        getHandle().hurtResistantTime = ticks;
     }
 
     @Override
@@ -267,8 +291,8 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
         return (net.minecraft.entity.LivingEntity) super.getHandle();
     }
 
-    public void setHandle(final EntityLiving entity) {
-        super.setHandle(entity);
+    public void setHandle(final LivingEntity entity) {
+        super.setHandle((net.minecraft.entity.Entity) entity);
     }
 
     @Override
@@ -278,17 +302,17 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
 
     @Override
     public Player getKiller() {
-        return getHandle().killer == null ? null : (Player) getHandle().killer.getBukkitEntity();
+        return getHandle().attackingPlayer == null ? null : (Player) wrap(getHandle().attackingPlayer);
     }
 
     @Override
-    public boolean addPotionEffect(PotionEffect effect) {
+    public boolean addPotionEffect(@NotNull PotionEffect effect) {
         return addPotionEffect(effect, false);
     }
 
     @Override
     public boolean addPotionEffect(PotionEffect effect, boolean force) {
-        getHandle().addEffect(new MobEffect(MobEffectList.fromId(effect.getType().getId()), effect.getDuration(), effect.getAmplifier(), effect.isAmbient(), effect.hasParticles()), EntityPotionEffectEvent.Cause.PLUGIN);
+        getHandle().addPotionEffect(new EffectInstance(Effect.get(effect.getType().getId()), effect.getDuration(), effect.getAmplifier(), effect.isAmbient(), effect.hasParticles()), EntityPotionEffectEvent.Cause.PLUGIN);
         return true;
     }
 
@@ -303,29 +327,50 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
 
     @Override
     public boolean hasPotionEffect(PotionEffectType type) {
-        return getHandle().hasEffect(MobEffectList.fromId(type.getId()));
+        Effect effect = Effect.get(type.getId());
+        Preconditions.checkNotNull(effect);
+        return getHandle().isPotionActive(effect);
     }
 
     @Override
     public PotionEffect getPotionEffect(PotionEffectType type) {
-        MobEffect handle = getHandle().getEffect(MobEffectList.fromId(type.getId()));
-        return (handle == null) ? null : new PotionEffect(PotionEffectType.getById(MobEffectList.getId(handle.getMobEffect())), handle.getDuration(), handle.getAmplifier(), handle.isAmbient(), handle.isShowParticles());
+        Effect effect = Effect.get(type.getId());
+        Preconditions.checkNotNull(effect);
+
+        EffectInstance handle = getHandle().getActivePotionEffect(effect);
+        if(handle == null)
+            return null;
+
+        PotionEffectType potionEffectType = PotionEffectType.getById(Effect.getId(handle.getPotion()));
+        Preconditions.checkNotNull(potionEffectType);
+
+        return new PotionEffect(potionEffectType, handle.getDuration(), handle.getAmplifier(), handle.isAmbient(), handle.doesShowParticles());
     }
 
     @Override
     public void removePotionEffect(PotionEffectType type) {
-        getHandle().removeEffect(MobEffectList.fromId(type.getId()), EntityPotionEffectEvent.Cause.PLUGIN);
+        getHandle().removePotionEffect(Effect.get(type.getId()), EntityPotionEffectEvent.Cause.PLUGIN);
     }
 
     @Override
+    @NotNull
     public Collection<PotionEffect> getActivePotionEffects() {
-        List<PotionEffect> effects = new ArrayList<PotionEffect>();
-        for (MobEffect handle : getHandle().effects.values()) {
-            effects.add(new PotionEffect(PotionEffectType.getById(MobEffectList.getId(handle.getMobEffect())), handle.getDuration(), handle.getAmplifier(), handle.isAmbient(), handle.isShowParticles()));
+        List<PotionEffect> effects = new ArrayList<>();
+        for (EffectInstance handle : getHandle().getActivePotionMap().values()) {
+            PotionEffectType potionEffectType = PotionEffectType.getById(Effect.getId(handle.getPotion()));
+            Preconditions.checkNotNull(potionEffectType);
+            effects.add(new PotionEffect(
+                potionEffectType,
+                handle.getDuration(),
+                handle.getAmplifier(),
+                handle.isAmbient(),
+                handle.doesShowParticles())
+            );
         }
         return effects;
     }
 
+    /*
     @Override
     public <T extends Projectile> T launchProjectile(Class<? extends T> projectile) {
         return launchProjectile(projectile, null);
@@ -418,31 +463,34 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
         world.addEntity(launch);
         return (T) launch.getBukkitEntity();
     }
+    */
 
     @Override
+    @NotNull
     public EntityType getType() {
         return EntityType.UNKNOWN;
     }
 
     @Override
+    @NotNull
     public Spigot spigot() {
         return null;
     }
 
     @Override
-    public boolean hasLineOfSight(Entity other) {
+    public boolean hasLineOfSight(@NotNull Entity other) {
         return getHandle().hasLineOfSight(((CraftEntity) other).getHandle());
     }
 
     @Override
     public boolean getRemoveWhenFarAway() {
-        return getHandle() instanceof EntityInsentient && !((EntityInsentient) getHandle()).persistent;
+        return getHandle() instanceof MobEntity && !((MobEntity) getHandle()).persistent;
     }
 
     @Override
     public void setRemoveWhenFarAway(boolean remove) {
-        if (getHandle() instanceof EntityInsentient) {
-            ((EntityInsentient) getHandle()).persistent = !remove;
+        if (getHandle() instanceof MobEntity) {
+            ((MobEntity) getHandle()).persistent = !remove;
         }
     }
 
@@ -453,12 +501,16 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
 
     @Override
     public void setCanPickupItems(boolean pickup) {
-        getHandle().canPickUpLoot = pickup;
+        if(getHandle() instanceof MobEntity)
+            ((MobEntity) getHandle()).setCanPickUpLoot(pickup);
+        canPickUpLoot = pickup; // appease to gods
     }
 
     @Override
     public boolean getCanPickupItems() {
-        return getHandle().canPickUpLoot;
+        if(getHandle() instanceof MobEntity)
+            return ((MobEntity) getHandle()).canPickUpLoot();
+        return canPickUpLoot;
     }
 
     @Override
@@ -472,44 +524,41 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
 
     @Override
     public boolean isLeashed() {
-        if (!(getHandle() instanceof EntityInsentient)) {
+        if (!(getHandle() instanceof MobEntity))
             return false;
-        }
-        return ((EntityInsentient) getHandle()).getLeashHolder() != null;
+        return ((MobEntity) getHandle()).getLeashHolder() != null;
     }
 
     @Override
     public Entity getLeashHolder() throws IllegalStateException {
-        if (!isLeashed()) {
+        if (!isLeashed())
             throw new IllegalStateException("Entity not leashed");
-        }
-        return ((EntityInsentient) getHandle()).getLeashHolder().getBukkitEntity();
+
+        // suppress this dumbass
+        return wrap(((MobEntity) getHandle()).getLeashHolder());
     }
 
     private boolean unleash() {
-        if (!isLeashed()) {
+        if (!isLeashed())
+
             return false;
-        }
-        ((EntityInsentient) getHandle()).unleash(true, false);
+        ((MobEntity) getHandle()).setU(true, false);
         return true;
     }
 
     @Override
     public boolean setLeashHolder(Entity holder) {
-        if ((getHandle() instanceof EntityWither) || !(getHandle() instanceof EntityInsentient)) {
+        if ((getHandle() instanceof WitherEntity) || !(getHandle() instanceof MobEntity))
             return false;
-        }
 
-        if (holder == null) {
+        if (holder == null)
             return unleash();
-        }
 
-        if (holder.isDead()) {
+        if (holder.isDead())
             return false;
-        }
 
         unleash();
-        ((EntityInsentient) getHandle()).setLeashHolder(((CraftEntity) holder).getHandle(), true);
+        ((MobEntity) getHandle()).setLeashHolder(((ForgeBukkitEntity) holder).getHandle(), true);
         return true;
     }
 
@@ -535,7 +584,7 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
 
     @Override
     public boolean isRiptiding() {
-        return getHandle().isRiptiding();
+        return getHandle().isSpinAttacking();
     }
 
     @Override
@@ -550,75 +599,73 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
 
     @Override
     public void setAI(boolean ai) {
-        if (this.getHandle() instanceof EntityInsentient) {
-            ((EntityInsentient) this.getHandle()).setNoAI(!ai);
-        }
+        if (getHandle() instanceof MobEntity)
+            ((MobEntity) this.getHandle()).setNoAI(!ai);
     }
 
     @Override
     public boolean hasAI() {
-        return (this.getHandle() instanceof EntityInsentient) ? !((EntityInsentient) this.getHandle()).isNoAI() : false;
+        return this.getHandle() instanceof MobEntity && !((MobEntity) this.getHandle()).isAIDisabled();
     }
 
     @Override
     public void attack(Entity target) {
         Preconditions.checkArgument(target != null, "target == null");
-
-        getHandle().attackEntity(((CraftEntity) target).getHandle());
+        getHandle().setLastAttackedEntity(((ForgeBukkitEntity) target).getHandle());
     }
 
     @Override
     public void swingMainHand() {
-        getHandle().swingHand(EnumHand.MAIN_HAND, true);
+        getHandle().swing(Hand.MAIN_HAND, true);
     }
 
     @Override
     public void swingOffHand() {
-        getHandle().swingHand(EnumHand.OFF_HAND, true);
+        getHandle().swing(Hand.OFF_HAND, true);
     }
 
     @Override
     public void setCollidable(boolean collidable) {
-        getHandle().collides = collidable;
+        collides = collidable;
     }
 
     @Override
     public boolean isCollidable() {
-        return getHandle().collides;
+        return collides;
     }
 
     @Override
     public Set<UUID> getCollidableExemptions() {
-        return getHandle().collidableExemptions;
+        return collidableExemptions;
     }
 
     @Override
     public <T> T getMemory(MemoryKey<T> memoryKey) {
-        return (T) getHandle().getBehaviorController().getMemory(CraftMemoryKey.fromMemoryKey(memoryKey)).map(CraftMemoryMapper::fromNms).orElse(null);
+        return (T) getHandle().getBrain().getMemory(CraftMemoryKey.fromMemoryKey(memoryKey)).map(CraftMemoryMapper::fromNms).orElse(null);
     }
 
     @Override
     public <T> void setMemory(MemoryKey<T> memoryKey, T t) {
-        getHandle().getBehaviorController().setMemory(CraftMemoryKey.fromMemoryKey(memoryKey), CraftMemoryMapper.toNms(t));
+        getHandle().getBrain().setMemory(CraftMemoryKey.fromMemoryKey(memoryKey), CraftMemoryMapper.toNms(t));
     }
 
     @Override
     public EntityCategory getCategory() {
-        EnumMonsterType type = getHandle().getMonsterType(); // Not actually an enum?
+        CreatureAttribute type = getHandle().getCreatureAttribute(); // Not actually an enum?
 
-        if (type == EnumMonsterType.UNDEFINED) {
+        // *yanderedev intensifies* not my fault btw
+        if (type == CreatureAttribute.UNDEFINED)
             return EntityCategory.NONE;
-        } else if (type == EnumMonsterType.UNDEAD) {
+        else if (type == CreatureAttribute.UNDEAD)
             return EntityCategory.UNDEAD;
-        } else if (type == EnumMonsterType.ARTHROPOD) {
+        else if (type == CreatureAttribute.ARTHROPOD)
             return EntityCategory.ARTHROPOD;
-        } else if (type == EnumMonsterType.ILLAGER) {
+        else if (type == CreatureAttribute.ILLAGER)
             return EntityCategory.ILLAGER;
-        } else if (type == EnumMonsterType.WATER_MOB) {
+        else if (type == CreatureAttribute.WATER)
             return EntityCategory.WATER;
-        }
 
-        throw new UnsupportedOperationException("Unsupported monster type: " + type + ". This is a bug, report this to Spigot.");
+        throw new UnsupportedOperationException("Unsupported monster type: " + type + ". This is a bug, report this to NOT SPIGOT ME.");
     }
 
     @Override
