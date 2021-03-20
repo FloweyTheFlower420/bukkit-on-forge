@@ -2,6 +2,7 @@ package com.floweytf.forgebukkit.entity;
 
 import com.floweytf.forgebukkit.ForgeBukkit;
 import com.floweytf.forgebukkit.ForgeBukkitServer;
+import com.floweytf.forgebukkit.inventory.ForgeBukkitEntityEquipment;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 import net.minecraft.entity.CreatureAttribute;
@@ -26,11 +27,8 @@ import org.bukkit.entity.memory.MemoryKey;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.potion.PotionType;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
@@ -38,12 +36,10 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.PreparedStatement;
 import java.util.*;
 
 public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements LivingEntity {
-    private static final Method damageEntity = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "func_70665_d", DamageSource.class, float.class);
-    private CraftEntityEquipment equipment;
+    private ForgeBukkitEntityEquipment equipment;
     boolean canPickUpLoot = false;
     public boolean collides = true;
     public Set<UUID> collidableExemptions = new HashSet<>();
@@ -52,7 +48,7 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
         super(server, entity);
 
         if (entity instanceof MobEntity || entity instanceof ArmorStandEntity) {
-            equipment = new CraftEntityEquipment(this);
+            equipment = new ForgeBukkitEntityEquipment(this);
         }
     }
 
@@ -240,12 +236,7 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
         else if (source instanceof LivingEntity)
             reason = DamageSource.causeMobDamage(((ForgeBukkitLivingEntity) source).getHandle());
 
-        try {
-            damageEntity.invoke(getHandle(), reason, (float) amount);
-        }
-        catch (IllegalAccessException | InvocationTargetException e) {
-            ForgeBukkit.logger.fatal(e);
-        }
+        getHandle().damageEntity(reason, (float) amount);
     }
 
     @Override
@@ -370,6 +361,17 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
         return effects;
     }
 
+    @Override
+    public <T extends Projectile> T launchProjectile(Class<? extends T> projectile) {
+        return launchProjectile(projectile, null);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends Projectile> T launchProjectile(Class<? extends T> projectile, Vector velocity) {
+        return null;
+    }
+
     /*
     @Override
     public <T extends Projectile> T launchProjectile(Class<? extends T> projectile) {
@@ -479,19 +481,18 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
 
     @Override
     public boolean hasLineOfSight(@NotNull Entity other) {
-        return getHandle().hasLineOfSight(((CraftEntity) other).getHandle());
+        return getHandle().canEntityBeSeen(((ForgeBukkitEntity) other).getHandle());
     }
 
     @Override
     public boolean getRemoveWhenFarAway() {
-        return getHandle() instanceof MobEntity && !((MobEntity) getHandle()).persistent;
+        return getHandle() instanceof MobEntity && !((MobEntity) getHandle()).persistenceRequired;
     }
 
     @Override
     public void setRemoveWhenFarAway(boolean remove) {
-        if (getHandle() instanceof MobEntity) {
-            ((MobEntity) getHandle()).persistent = !remove;
-        }
+        if (getHandle() instanceof MobEntity)
+            ((MobEntity) getHandle()).persistenceRequired = !remove;
     }
 
     @Override
@@ -540,9 +541,9 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
 
     private boolean unleash() {
         if (!isLeashed())
-
             return false;
-        ((MobEntity) getHandle()).setU(true, false);
+
+        ((MobEntity) getHandle()).clearLeashed(true, false);
         return true;
     }
 

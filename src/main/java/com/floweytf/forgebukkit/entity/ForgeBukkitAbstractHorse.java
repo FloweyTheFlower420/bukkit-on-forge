@@ -1,13 +1,10 @@
 package com.floweytf.forgebukkit.entity;
 
 import com.floweytf.forgebukkit.ForgeBukkitServer;
+import com.floweytf.forgebukkit.access.AbstractHorseEntityMixinAccess;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
-import net.minecraft.server.EntityHorseAbstract;
-import net.minecraft.server.GenericAttributes;
 import org.apache.commons.lang.Validate;
-import org.bukkit.craftbukkit.CraftServer;
-import org.bukkit.craftbukkit.inventory.CraftInventoryAbstractHorse;
 import org.bukkit.entity.AbstractHorse;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Horse;
@@ -45,13 +42,13 @@ public abstract class ForgeBukkitAbstractHorse extends ForgeBukkitAnimals implem
 
     @Override
     public int getMaxDomestication() {
-        return getHandle().getMaxDomestication();
+        return ((AbstractHorseEntityMixinAccess)getHandle()).getMaxDomestication();
     }
 
     @Override
     public void setMaxDomestication(int value) {
         Validate.isTrue(value > 0, "Max domestication cannot be zero or less");
-        getHandle().maxDomestication = value;
+        ((AbstractHorseEntityMixinAccess)getHandle()).setMaxDomestication(value);
     }
 
     @Override
@@ -85,7 +82,7 @@ public abstract class ForgeBukkitAbstractHorse extends ForgeBukkitAnimals implem
     public void setOwner(AnimalTamer owner) {
         if (owner != null) {
             setTamed(true);
-            getHandle().setGoalTarget(null, null, false);
+            ForgeBukkitMob.setTargetGoal(getHandle(), null, null, false);
             setOwnerUUID(owner.getUniqueId());
         } else {
             setTamed(false);
@@ -94,15 +91,15 @@ public abstract class ForgeBukkitAbstractHorse extends ForgeBukkitAnimals implem
     }
 
     public UUID getOwnerUUID() {
-        return getHandle().getOwnerUUID();
+        return getHandle().getOwnerUniqueId();
     }
 
     public void setOwnerUUID(UUID uuid) {
-        getHandle().setOwnerUUID(uuid);
+        getHandle().setOwnerUniqueId(uuid);
     }
 
     @Override
     public AbstractHorseInventory getInventory() {
-        return new CraftInventoryAbstractHorse(getHandle().inventoryChest);
+        return new CraftInventoryAbstractHorse(getHandle().horseChest);
     }
 }

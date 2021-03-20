@@ -4,6 +4,7 @@ import com.floweytf.forgebukkit.ForgeBukkit;
 import com.floweytf.forgebukkit.ForgeBukkitServer;
 import com.floweytf.forgebukkit.ForgeBukkitWorld;
 import com.floweytf.forgebukkit.Wrapper;
+import com.floweytf.forgebukkit.access.EntityMixinAccess;
 import com.floweytf.forgebukkit.persistence.ForgeBukkitPersistentDataContainer;
 import com.floweytf.forgebukkit.persistence.ForgeBukkitPersistentDataTypeRegistry;
 import com.floweytf.forgebukkit.util.ForgeBukkitChatMessage;
@@ -34,10 +35,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.bukkit.entity.Entity {
@@ -378,7 +376,7 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
 
         // Let the server handle cross world teleports
         if (!location.getWorld().equals(getWorld())) {
-            getHandle().teleportTo(((ForgeBukkitWorld) location.getWorld()).getHandle(), new BlockPos(location.getX(), location.getY(), location.getZ()));
+            //getHandle().teleportTo(((ForgeBukkitWorld) location.getWorld()).getHandle(), new BlockPos(location.getX(), location.getY(), location.getZ()));
             return true;
         }
 
@@ -403,8 +401,8 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
     @Override
     @NotNull
     public List<org.bukkit.entity.Entity> getNearbyEntities(double x, double y, double z) {
-        List<Entity> notchEntityList = getHandle().world.getEntities(entity, entity.getBoundingBox().grow(x, y, z), null);
-        List<org.bukkit.entity.Entity> bukkitEntityList = new java.util.ArrayList<org.bukkit.entity.Entity>(notchEntityList.size());
+        List<Entity> notchEntityList = getHandle().world.getEntitiesInAABBexcluding(getHandle(), getHandle().getBoundingBox().grow(x, y, z), null);
+        List<org.bukkit.entity.Entity> bukkitEntityList = new ArrayList<>(notchEntityList.size());
 
         for (Entity e : notchEntityList)
             bukkitEntityList.add(wrap(e));
@@ -456,12 +454,12 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
 
     @Override
     public boolean isPersistent() {
-        return getHandle().isPer;
+        return ((EntityMixinAccess)getHandle()).getPersist();
     }
 
     @Override
     public void setPersistent(boolean persistent) {
-        getHandle().persist = persistent;
+        ((EntityMixinAccess)getHandle()).setPersist(persistent);
     }
 
     public Vector getMomentum() {
@@ -797,7 +795,7 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
 
     @Override
     public boolean isInvulnerable() {
-        return getHandle().isInvulnerable(DamageSource.GENERIC);
+        return getHandle().isInvulnerableTo(DamageSource.GENERIC);
     }
 
     @Override
@@ -822,28 +820,28 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
 
     @Override
     public int getPortalCooldown() {
-        return getHandle().getPortalCooldown();
+        return getHandle().portalCounter;
     }
 
     @Override
     public void setPortalCooldown(int cooldown) {
-        getHandle().portalCooldown = cooldown;
+        getHandle().portalCounter = cooldown;
     }
 
     @Override
     @NotNull
     public Set<String> getScoreboardTags() {
-        return getHandle().getScoreboardTags();
+        return getHandle().getTags();
     }
 
     @Override
     public boolean addScoreboardTag(@NotNull String tag) {
-        return getHandle().addScoreboardTag(tag);
+        return getHandle().addTag(tag);
     }
 
     @Override
     public boolean removeScoreboardTag(@NotNull String tag) {
-        return getHandle().removeScoreboardTag(tag);
+        return getHandle().removeTag(tag);
     }
 
     @Override
@@ -856,7 +854,7 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
     @NotNull
     public BlockFace getFacing() {
         // Use this method over getDirection because it handles boats and minecarts.
-        return CraftBlock.notchToBlockFace(getHandle().getAdjustedDirection());
+        return  null; //CraftBlock.notchToBlockFace(getHandle().getAdjustedHorizontalFacing());
     }
 
     @Override

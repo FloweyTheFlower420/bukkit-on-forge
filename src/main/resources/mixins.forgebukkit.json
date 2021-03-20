@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "com.floweytf.forgebukkit.mixins",
+  "refmap": "mixins.myplugin.refmap.json",
+  "target": "@env(DEFAULT)",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "",
+    "EntityMixin"
+  ]
+}
