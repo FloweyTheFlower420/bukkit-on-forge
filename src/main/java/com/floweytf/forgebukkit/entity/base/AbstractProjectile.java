@@ -1,6 +1,7 @@
-package com.floweytf.forgebukkit.entity;
+package com.floweytf.forgebukkit.entity.base;
 
 import com.floweytf.forgebukkit.ForgeBukkitServer;
+import com.floweytf.forgebukkit.entity.ForgeBukkitEntity;
 import net.minecraft.entity.Entity;
 import org.bukkit.entity.Projectile;
 

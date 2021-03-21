@@ -1,6 +1,6 @@
 package com.floweytf.forgebukkit;
 
-import com.floweytf.forgebukkit.entity.ForgeBukkitPlayer;
+import com.floweytf.forgebukkit.entity.impl.ForgeBukkitPlayer;
 import com.floweytf.forgebukkit.metadata.EntityMetadataStore;
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -14,7 +14,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Boss;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;

@@ -1,14 +1,13 @@
 package com.floweytf.forgebukkit.entity.impl;
 
 import com.floweytf.forgebukkit.ForgeBukkitServer;
+import com.floweytf.forgebukkit.entity.base.ForgeBukkitAmbient;
 import net.minecraft.entity.passive.BatEntity;
-import net.minecraft.server.EntityBat;
-import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Bat;
 import org.bukkit.entity.EntityType;
 
-public class CraftBat extends CraftAmbient implements Bat {
-    public CraftBat(ForgeBukkitServer server, BatEntity entity) {
+public class ForgeBukkitBat extends ForgeBukkitAmbient implements Bat {
+    public ForgeBukkitBat(ForgeBukkitServer server, BatEntity entity) {
         super(server, entity);
     }
 
@@ -19,7 +18,7 @@ public class CraftBat extends CraftAmbient implements Bat {
 
     @Override
     public String toString() {
-        return "CraftBat";
+        return "ForgeBukkitBat";
     }
 
     @Override

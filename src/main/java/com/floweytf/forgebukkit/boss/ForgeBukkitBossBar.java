@@ -3,7 +3,7 @@ package com.floweytf.forgebukkit.boss;
 import com.floweytf.forgebukkit.ForgeBukkit;
 import com.floweytf.forgebukkit.Wrapper;
 import com.floweytf.forgebukkit.entity.ForgeBukkitEntity;
-import com.floweytf.forgebukkit.entity.ForgeBukkitPlayer;
+import com.floweytf.forgebukkit.entity.impl.ForgeBukkitPlayer;
 import com.floweytf.forgebukkit.util.ForgeBukkitChatMessage;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;

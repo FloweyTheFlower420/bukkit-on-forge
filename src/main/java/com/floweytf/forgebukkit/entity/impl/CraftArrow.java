@@ -1,21 +1,17 @@
 package com.floweytf.forgebukkit.entity.impl;
 
 import com.floweytf.forgebukkit.ForgeBukkitServer;
-import com.floweytf.forgebukkit.entity.AbstractProjectile;
+import com.floweytf.forgebukkit.entity.base.AbstractProjectile;
 import com.floweytf.forgebukkit.entity.ForgeBukkitEntity;
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.projectile.ArrowEntity;
-import net.minecraft.server.BlockPosition;
-import net.minecraft.server.EntityArrow;
 import net.minecraft.util.math.BlockPos;
 import org.apache.commons.lang.Validate;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.AbstractArrow;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.projectiles.ProjectileSource;
-import org.jetbrains.annotations.NotNull;
 
 public class CraftArrow extends AbstractProjectile implements AbstractArrow {
 
@@ -136,11 +132,5 @@ public class CraftArrow extends AbstractProjectile implements AbstractArrow {
     @Override
     public EntityType getType() {
         return EntityType.UNKNOWN;
-    }
-
-    @NotNull
-    @Override
-    public Spigot spigot() {
-        return null;
     }
 }

@@ -1,18 +1,19 @@
 package com.floweytf.forgebukkit.entity.impl;
 
 import com.floweytf.forgebukkit.ForgeBukkitServer;
+import com.floweytf.forgebukkit.entity.ForgeBukkitMonster;
 import net.minecraft.entity.monster.BlazeEntity;
 import org.bukkit.entity.Blaze;
 import org.bukkit.entity.EntityType;
 
-public class CraftBlaze extends ForgeBukkitMonster implements Blaze {
-    public CraftBlaze(ForgeBukkitServer server, BlazeEntity entity) {
+public class ForgeBukkitBlaze extends ForgeBukkitMonster implements Blaze {
+    public ForgeBukkitBlaze(ForgeBukkitServer server, BlazeEntity entity) {
         super(server, entity);
     }
 
     @Override
     public BlazeEntity getHandle() {
-        return (BlazeEntity) entity;
+        return (BlazeEntity) super.getHandle();
     }
 
     @Override

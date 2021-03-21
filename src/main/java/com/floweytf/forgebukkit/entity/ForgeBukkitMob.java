@@ -2,6 +2,8 @@ package com.floweytf.forgebukkit.entity;
 
 import com.floweytf.forgebukkit.ForgeBukkit;
 import com.floweytf.forgebukkit.ForgeBukkitServer;
+import com.floweytf.forgebukkit.entity.ForgeBukkitEntity;
+import com.floweytf.forgebukkit.entity.ForgeBukkitLivingEntity;
 import com.floweytf.forgebukkit.util.ForgeBukkitNamespacedKey;
 import net.minecraft.entity.MobEntity;
 import org.bukkit.Bukkit;

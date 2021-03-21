@@ -1,7 +1,7 @@
 package com.floweytf.forgebukkit.entity;
 
-import com.floweytf.forgebukkit.ForgeBukkit;
 import com.floweytf.forgebukkit.ForgeBukkitServer;
+import com.floweytf.forgebukkit.entity.impl.ForgeBukkitPlayer;
 import com.floweytf.forgebukkit.inventory.ForgeBukkitEntityEquipment;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
@@ -14,7 +14,6 @@ import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.apache.commons.lang.Validate;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
@@ -34,8 +33,6 @@ import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.*;
 
 public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements LivingEntity {

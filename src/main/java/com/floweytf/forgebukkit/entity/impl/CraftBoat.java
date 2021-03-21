@@ -1,12 +1,13 @@
 package com.floweytf.forgebukkit.entity.impl;
 
 import com.floweytf.forgebukkit.ForgeBukkitServer;
+import com.floweytf.forgebukkit.entity.base.ForgeBukkitVehicle;
 import net.minecraft.entity.item.BoatEntity;
 import org.bukkit.TreeSpecies;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.EntityType;
 
-public class CraftBoat extends CraftVehicle implements Boat {
+public class CraftBoat extends ForgeBukkitVehicle implements Boat {
     public double maxSpeed = 0.4D;
     public double occupiedDeceleration = 0.2D;
     public double unoccupiedDeceleration = -1;

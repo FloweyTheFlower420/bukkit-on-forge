@@ -1,7 +1,9 @@
-package com.floweytf.forgebukkit.entity;
+package com.floweytf.forgebukkit.entity.base;
 
 import com.floweytf.forgebukkit.ForgeBukkitServer;
 import com.floweytf.forgebukkit.access.AbstractHorseEntityMixinAccess;
+import com.floweytf.forgebukkit.entity.ForgeBukkitAnimals;
+import com.floweytf.forgebukkit.entity.ForgeBukkitMob;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import org.apache.commons.lang.Validate;

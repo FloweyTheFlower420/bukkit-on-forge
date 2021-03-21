@@ -905,4 +905,9 @@ public abstract class ForgeBukkitEntity extends Wrapper<Entity> implements org.b
         }
         return perm;
     }
+
+    @Override
+    public Spigot spigot() {
+        return null;
+    }
 }

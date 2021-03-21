@@ -1,4 +1,4 @@
-package com.floweytf.forgebukkit.entity;
+package com.floweytf.forgebukkit.entity.impl;
 
 import com.floweytf.forgebukkit.Wrapper;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -28,7 +28,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
 
