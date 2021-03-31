@@ -1,5 +1,6 @@
 package com.floweytf.forgebukkit.inventory;
 
+import com.floweytf.forgebukkit.util.ForgeBukkitMagicNumbers;
 import com.floweytf.forgebukkit.util.ForgeBukkitNamespacedKey;
 import com.google.common.collect.ImmutableMap;
 import java.util.Map;
@@ -26,7 +27,7 @@ public final class ForgeBukkitItemStack extends ItemStack {
         if (original == null || original.getType() == Material.AIR)
             return net.minecraft.item.ItemStack.EMPTY;
 
-        Item item = CraftMagicNumbers.getItem(original.getType(), original.getDurability());
+        Item item = ForgeBukkitMagicNumbers.getItem(original.getType(), original.getDurability());
 
         if (item == null)
             return net.minecraft.item.ItemStack.EMPTY;
@@ -51,7 +52,7 @@ public final class ForgeBukkitItemStack extends ItemStack {
         if (original.isEmpty()) {
             return new ItemStack(Material.AIR);
         }
-        ItemStack stack = new ItemStack(CraftMagicNumbers.getMaterial(original.getItem()), original.getCount());
+        ItemStack stack = new ItemStack(ForgeBukkitMagicNumbers.getMaterial(original.getItem()), original.getCount());
         if (hasItemMeta(original)) {
             stack.setItemMeta(getItemMeta(original));
         }
@@ -75,7 +76,7 @@ public final class ForgeBukkitItemStack extends ItemStack {
     }
 
     public static ForgeBukkitItemStack asNewCraftStack(Item item, int amount) {
-        return new ForgeBukkitItemStack(CraftMagicNumbers.getMaterial(item), amount, (short) 0, null);
+        return new ForgeBukkitItemStack(ForgeBukkitMagicNumbers.getMaterial(item), amount, (short) 0, null);
     }
 
     net.minecraft.item.ItemStack handle;
@@ -100,12 +101,12 @@ public final class ForgeBukkitItemStack extends ItemStack {
 
     @Override
     public MaterialData getData() {
-        return handle != null ? CraftMagicNumbers.getMaterialData(handle.getItem()) : super.getData();
+        return handle != null ? ForgeBukkitMagicNumbers.getMaterialData(handle.getItem()) : super.getData();
     }
 
     @Override
     public Material getType() {
-        return handle != null ? CraftMagicNumbers.getMaterial(handle.getItem()) : Material.AIR;
+        return handle != null ? ForgeBukkitMagicNumbers.getMaterial(handle.getItem()) : Material.AIR;
     }
 
     @Override
@@ -114,12 +115,12 @@ public final class ForgeBukkitItemStack extends ItemStack {
             return;
         } else if (type == Material.AIR) {
             handle = null;
-        } else if (CraftMagicNumbers.getItem(type) == null) { // :(
+        } else if (ForgeBukkitMagicNumbers.getItem(type) == null) { // :(
             handle = null;
         } else if (handle == null) {
-            handle = new net.minecraft.item.ItemStack(CraftMagicNumbers.getItem(type), 1);
+            handle = new net.minecraft.item.ItemStack(ForgeBukkitMagicNumbers.getItem(type), 1);
         } else {
-            handle.setItem(CraftMagicNumbers.getItem(type));
+            handle.setItem(ForgeBukkitMagicNumbers.getItem(type));
             if (hasItemMeta()) {
                 // This will create the appropriate item meta, which will contain all the data we intend to keep
                 setItemMeta(handle, getItemMeta(handle));
@@ -515,7 +516,7 @@ public final class ForgeBukkitItemStack extends ItemStack {
             case SMOKER:
             case BEEHIVE:
             case BEE_NEST:
-                return new CraftMetaBlockState(item.getTag(), CraftMagicNumbers.getMaterial(item.getItem()));
+                return new CraftMetaBlockState(item.getTag(), ForgeBukkitMagicNumbers.getMaterial(item.getItem()));
             case TROPICAL_FISH_BUCKET:
                 return new CraftMetaTropicalFishBucket(item.getTag());
             case CROSSBOW:
@@ -536,7 +537,7 @@ public final class ForgeBukkitItemStack extends ItemStack {
     }
 
     static Material getType(net.minecraft.item.ItemStack item) {
-        return item == null ? Material.AIR : CraftMagicNumbers.getMaterial(item.getItem());
+        return item == null ? Material.AIR : ForgeBukkitMagicNumbers.getMaterial(item.getItem());
     }
 
     @Override
@@ -560,7 +561,7 @@ public final class ForgeBukkitItemStack extends ItemStack {
         if (itemMeta == null) return true;
 
         Item oldItem = item.getItem();
-        Item newItem = CraftMagicNumbers.getItem(CraftItemFactory.instance().updateMaterial(itemMeta, CraftMagicNumbers.getMaterial(oldItem)));
+        Item newItem = ForgeBukkitMagicNumbers.getItem(CraftItemFactory.instance().updateMaterial(itemMeta, ForgeBukkitMagicNumbers.getMaterial(oldItem)));
         if (oldItem != newItem) {
             item.setItem(newItem);
         }

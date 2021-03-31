@@ -2,13 +2,11 @@ package com.floweytf.forgebukkit.entity.impl;
 
 import com.floweytf.forgebukkit.ForgeBukkitServer;
 import net.minecraft.entity.monster.CaveSpiderEntity;
-import net.minecraft.server.EntityCaveSpider;
-import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.CaveSpider;
 import org.bukkit.entity.EntityType;
 
-public class CraftCaveSpider extends CraftSpider implements CaveSpider {
-    public CraftCaveSpider(ForgeBukkitServer server, CaveSpiderEntity entity) {
+public class ForgeBukkitCaveSpider extends ForgeBukkitSpider implements CaveSpider {
+    public ForgeBukkitCaveSpider(ForgeBukkitServer server, CaveSpiderEntity entity) {
         super(server, entity);
     }
 

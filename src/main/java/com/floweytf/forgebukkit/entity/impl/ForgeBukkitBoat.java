@@ -7,13 +7,13 @@ import org.bukkit.TreeSpecies;
 import org.bukkit.entity.Boat;
 import org.bukkit.entity.EntityType;
 
-public class CraftBoat extends ForgeBukkitVehicle implements Boat {
+public class ForgeBukkitBoat extends ForgeBukkitVehicle implements Boat {
     public double maxSpeed = 0.4D;
     public double occupiedDeceleration = 0.2D;
     public double unoccupiedDeceleration = -1;
     public boolean landBoats = false;
 
-    public CraftBoat(ForgeBukkitServer server, BoatEntity entity) {
+    public ForgeBukkitBoat(ForgeBukkitServer server, BoatEntity entity) {
         super(server, entity);
     }
 

@@ -1,5 +1,6 @@
 package com.floweytf.forgebukkit.inventory;
 
+import com.floweytf.forgebukkit.ForgeBukkitEquipmentSlot;
 import com.floweytf.forgebukkit.entity.ForgeBukkitLivingEntity;
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.MobEntity;
@@ -26,7 +27,7 @@ public class ForgeBukkitEntityEquipment implements EntityEquipment {
     @Override
     public void setItem(@NotNull EquipmentSlot slot, ItemStack item, boolean silent) {
         Preconditions.checkArgument(slot != null, "slot must not be null");
-        EquipmentSlotType nmsSlot = CraftEquipmentSlot.getNMS(slot);
+        EquipmentSlotType nmsSlot = ForgeBukkitEquipmentSlot.fromBukkit(slot);
         setEquipment(nmsSlot, item, silent);
     }
 
@@ -34,7 +35,7 @@ public class ForgeBukkitEntityEquipment implements EntityEquipment {
     @NotNull
     public ItemStack getItem(@NotNull EquipmentSlot slot) {
         Preconditions.checkArgument(slot != null, "slot must not be null");
-        EquipmentSlotType nmsSlot = CraftEquipmentSlot.getNMS(slot);
+        EquipmentSlotType nmsSlot = ForgeBukkitEquipmentSlot.fromBukkit(slot);
         return getEquipment(nmsSlot);
     }
 

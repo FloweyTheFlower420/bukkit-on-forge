@@ -1,27 +1,21 @@
 package com.floweytf.forgebukkit;
 
-import net.minecraft.network.play.server.SUpdateBossInfoPacket;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.end.DragonFightManager;
-import net.minecraft.world.server.ServerBossInfo;
+import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
+import net.minecraftforge.fml.event.server.*;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.Method;
-
-@Mod("forgebukkit")
+@Mod(ForgeBukkit.MODID)
 public class ForgeBukkit
 {
     public static final Logger logger = LogManager.getLogger("ForgeBukkit");
-    public static MinecraftServer server = null;
-    public static Method generatePortal = ObfuscationReflectionHelper.findMethod(DragonFightManager.class, "func_186094_a ", boolean.class);
-    public static Method sendUpdate = ObfuscationReflectionHelper.findMethod(ServerBossInfo.class, "func_186759_a ", SUpdateBossInfoPacket.Operation.class);
+
+    public static DedicatedServer server = null;
+    public static final String MODID = "forgebukkit";
+
+
     public static String version = "1.0";
 
     public static void invokeFatal(Throwable e) {
@@ -30,10 +24,32 @@ public class ForgeBukkit
 
     public ForgeBukkit() {
         logger.info("ForgeBukkit started!");
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::server);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::serverAboutToStart);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::serverStarting);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::serverStarted);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::serverStopping);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::serverStopped);
     }
 
-    private void server(final FMLServerStartedEvent event) {
-        server = event.getServer();
+    private void serverAboutToStart(final FMLServerAboutToStartEvent event) {
+        phase = Phase.ABOUT_TO_START;
+    }
+
+    private void serverStarting(final FMLServerStartingEvent event) {
+        phase = Phase.STARTING;
+    }
+
+    private void serverStarted(final FMLServerStartedEvent event) {
+        phase = Phase.STARTED;
+        if(event.getServer() instanceof DedicatedServer)
+            server = (DedicatedServer) event.getServer();
+    }
+
+    private void serverStopping(final FMLServerStoppingEvent event) {
+        phase = Phase.STOPPING;
+    }
+
+    private void serverStopped(final FMLServerStoppedEvent event) {
+        phase = Phase.STOPPED;
     }
 }

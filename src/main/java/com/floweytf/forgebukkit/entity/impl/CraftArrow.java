@@ -106,7 +106,7 @@ public class CraftArrow extends AbstractProjectile implements AbstractArrow {
         super.setTicksLived(value);
 
         // Second field for EntityArrow
-        getHandle().despawnCounter = value;
+        getHandle(). = value;
     }
 
     @Override

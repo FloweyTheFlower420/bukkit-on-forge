@@ -1,6 +1,7 @@
 package com.floweytf.forgebukkit.entity.impl;
 
 import com.floweytf.forgebukkit.Wrapper;
+import com.floweytf.forgebukkit.entity.ForgeBukkitEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import org.bukkit.*;
 import org.bukkit.advancement.Advancement;
@@ -34,9 +35,9 @@ import org.bukkit.util.RayTraceResult;
 import java.net.InetSocketAddress;
 import java.util.*;
 
-public class ForgeBukkitPlayer extends Wrapper<ServerPlayerEntity> implements Player {
+public class ForgeBukkitPlayer extends ForgeBukkitEntity implements Player {
 
-    public ForgeBukkitPlayer(ServerPlayerEntity handle) {
+    public ForgeBukkitPlayer(ForgeBukkitServer server, ServerPlayerEntity handle) {
         super(handle);
     }
 

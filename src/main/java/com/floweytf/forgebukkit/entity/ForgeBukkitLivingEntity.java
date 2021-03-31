@@ -2,6 +2,8 @@ package com.floweytf.forgebukkit.entity;
 
 import com.floweytf.forgebukkit.ForgeBukkitServer;
 import com.floweytf.forgebukkit.entity.impl.ForgeBukkitPlayer;
+import com.floweytf.forgebukkit.entity.memory.CraftMemoryMapper;
+import com.floweytf.forgebukkit.entity.memory.ForgeBukkitMemoryKey;
 import com.floweytf.forgebukkit.inventory.ForgeBukkitEntityEquipment;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
@@ -639,17 +641,19 @@ public class ForgeBukkitLivingEntity extends ForgeBukkitEntity implements Living
 
     @Override
     public <T> T getMemory(MemoryKey<T> memoryKey) {
-        return (T) getHandle().getBrain().getMemory(CraftMemoryKey.fromMemoryKey(memoryKey)).map(CraftMemoryMapper::fromNms).orElse(null);
+        return (T) getHandle().getBrain().getMemory(ForgeBukkitMemoryKey.fromMemoryKey(memoryKey)).map(CraftMemoryMapper::fromNms).orElse(null);
     }
 
     @Override
     public <T> void setMemory(MemoryKey<T> memoryKey, T t) {
-        getHandle().getBrain().setMemory(CraftMemoryKey.fromMemoryKey(memoryKey), CraftMemoryMapper.toNms(t));
+        getHandle().getBrain().setMemory(ForgeBukkitMemoryKey.fromMemoryKey(memoryKey), CraftMemoryMapper.toMinecraft(t));
     }
 
     @Override
     public EntityCategory getCategory() {
         CreatureAttribute type = getHandle().getCreatureAttribute(); // Not actually an enum?
+
+        // Im so tempted to use .ordinal() but this isn't c++ ig
 
         // *yanderedev intensifies* not my fault btw
         if (type == CreatureAttribute.UNDEFINED)

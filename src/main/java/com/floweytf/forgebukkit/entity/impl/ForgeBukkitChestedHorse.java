@@ -5,9 +5,9 @@ import com.floweytf.forgebukkit.entity.base.ForgeBukkitAbstractHorse;
 import net.minecraft.entity.passive.horse.AbstractChestedHorseEntity;
 import org.bukkit.entity.ChestedHorse;
 
-public abstract class CraftChestedHorse extends ForgeBukkitAbstractHorse implements ChestedHorse {
+public abstract class ForgeBukkitChestedHorse extends ForgeBukkitAbstractHorse implements ChestedHorse {
 
-    public CraftChestedHorse(ForgeBukkitServer server, AbstractChestedHorseEntity entity) {
+    public ForgeBukkitChestedHorse(ForgeBukkitServer server, AbstractChestedHorseEntity entity) {
         super(server, entity);
     }
 
