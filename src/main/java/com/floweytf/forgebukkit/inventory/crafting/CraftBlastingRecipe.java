@@ -27,7 +27,7 @@ public class CraftBlastingRecipe extends BlastingRecipe implements CraftRecipe {
     public void addToCraftingManager() {
         ItemStack result = this.getResult();
 
-        ((ForgeBukkitServer)Bukkit.getServer()).getHandle().getRecipeManager().add
-        MinecraftServer.getServer().getCraftingManager().addRecipe(new net.minecraft.server.RecipeBlasting(CraftNamespacedKey.toMinecraft(this.getKey()), this.getGroup(), toMinecraft(this.getInputChoice(), true), CraftItemStack.asNMSCopy(result), getExperience(), getCookingTime()));
+        //((ForgeBukkitServer)Bukkit.getServer()).getHandle().getRecipeManager().add
+        //MinecraftServer.getServer().getCraftingManager().addRecipe(new net.minecraft.server.RecipeBlasting(CraftNamespacedKey.toMinecraft(this.getKey()), this.getGroup(), toMinecraft(this.getInputChoice(), true), CraftItemStack.asNMSCopy(result), getExperience(), getCookingTime()));
     }
 }

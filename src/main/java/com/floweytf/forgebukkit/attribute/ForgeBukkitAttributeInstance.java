@@ -1,6 +1,7 @@
 package com.floweytf.forgebukkit.attribute;
 
 import com.floweytf.forgebukkit.Wrapper;
+import com.floweytf.forgebukkit.util.Converter;
 import com.google.common.base.Preconditions;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,6 +14,7 @@ import org.bukkit.attribute.AttributeModifier;
 
 import javax.annotation.Nonnull;
 
+@Converter
 public class ForgeBukkitAttributeInstance extends Wrapper<ModifiableAttributeInstance> implements AttributeInstance {
     private final Attribute attribute;
 
@@ -42,7 +44,7 @@ public class ForgeBukkitAttributeInstance extends Wrapper<ModifiableAttributeIns
     public Collection<AttributeModifier> getModifiers() {
         List<AttributeModifier> result = new ArrayList<>();
         for (net.minecraft.entity.ai.attributes.AttributeModifier mc : getHandle().getModifierListCopy()) {
-            result.add(convert(mc));
+            result.add(toBukkit(mc));
         }
 
         return result;
@@ -51,13 +53,13 @@ public class ForgeBukkitAttributeInstance extends Wrapper<ModifiableAttributeIns
     @Override
     public void addModifier(@Nonnull AttributeModifier modifier) {
         Preconditions.checkArgument(modifier != null, "modifier");
-        getHandle().applyPersistentModifier(convert(modifier));
+        getHandle().applyPersistentModifier(toMinecraft(modifier));
     }
 
     @Override
     public void removeModifier(@Nonnull AttributeModifier modifier) {
         Preconditions.checkArgument(modifier != null, "modifier");
-        getHandle().removeModifier(convert(modifier));
+        getHandle().removeModifier(toMinecraft(modifier));
     }
 
     @Override
@@ -70,11 +72,11 @@ public class ForgeBukkitAttributeInstance extends Wrapper<ModifiableAttributeIns
         return getHandle().getAttribute().getDefaultValue();
     }
 
-    public static net.minecraft.entity.ai.attributes.AttributeModifier convert(AttributeModifier bukkit) {
+    public static net.minecraft.entity.ai.attributes.AttributeModifier toMinecraft(AttributeModifier bukkit) {
         return new net.minecraft.entity.ai.attributes.AttributeModifier(bukkit.getUniqueId(), bukkit.getName(), bukkit.getAmount(), net.minecraft.entity.ai.attributes.AttributeModifier.Operation.values()[bukkit.getOperation().ordinal()]);
     }
 
-    public static AttributeModifier convert(net.minecraft.entity.ai.attributes.AttributeModifier nms) {
-        return new AttributeModifier(nms.getID(), nms.getName(), nms.getAmount(), AttributeModifier.Operation.values()[nms.getOperation().ordinal()]);
+    public AttributeModifier toBukkit(net.minecraft.entity.ai.attributes.AttributeModifier minecraft) {
+        return new AttributeModifier(minecraft.getID(), minecraft.getName(), minecraft.getAmount(), AttributeModifier.Operation.values()[minecraft.getOperation().ordinal()]);
     }
 }

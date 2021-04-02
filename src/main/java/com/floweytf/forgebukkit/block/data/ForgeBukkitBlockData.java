@@ -14,9 +14,6 @@ import org.bukkit.Material;
 import org.bukkit.SoundGroup;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.craftbukkit.CraftSoundGroup;
-import org.bukkit.craftbukkit.block.CraftBlock;
-import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 
 import java.util.HashMap;
 import java.util.Map;

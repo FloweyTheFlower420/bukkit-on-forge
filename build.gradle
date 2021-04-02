@@ -74,7 +74,7 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.1.0'
     // why I don't want to implement the spigot api
     compile "org.spigotmc:spigot-api:$bukkit_version"
-
+    annotationProcessor project(":annotation")
 }
 
 jar {
