@@ -24,32 +24,11 @@ public class ForgeBukkit
 
     public ForgeBukkit() {
         logger.info("ForgeBukkit started!");
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::serverAboutToStart);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::serverStarting);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::serverStarted);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::serverStopping);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::serverStopped);
     }
-
-    private void serverAboutToStart(final FMLServerAboutToStartEvent event) {
-        phase = Phase.ABOUT_TO_START;
-    }
-
-    private void serverStarting(final FMLServerStartingEvent event) {
-        phase = Phase.STARTING;
-    }
-
     private void serverStarted(final FMLServerStartedEvent event) {
-        phase = Phase.STARTED;
         if(event.getServer() instanceof DedicatedServer)
             server = (DedicatedServer) event.getServer();
     }
 
-    private void serverStopping(final FMLServerStoppingEvent event) {
-        phase = Phase.STOPPING;
-    }
-
-    private void serverStopped(final FMLServerStoppedEvent event) {
-        phase = Phase.STOPPED;
-    }
 }

@@ -12,7 +12,6 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
-import java.util.List;
 import java.util.Set;
 
 
@@ -20,7 +19,6 @@ import java.util.Set;
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @AutoService(Processor.class)
 public class AnnotationProcessor extends AbstractProcessor {
-
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (TypeElement annotation : annotations) {
@@ -29,32 +27,7 @@ public class AnnotationProcessor extends AbstractProcessor {
             for(Element e: rootElement) {
                 if(e.getKind() == ElementKind.CLASS) {
                     TypeElement classElement = (TypeElement) e;
-                    String className = e.getSimpleName().toString();
-                    List<? extends javax.lang.model.type.TypeMirror> interfaceElement = classElement.getInterfaces();
-                    if(interfaceElement.size() == 0)
-                        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Class does not extend bukkit class", classElement);
-                    TypeMirror bukkitInterfaceClass = null;
-                    for(TypeMirror iter : interfaceElement)
-                        if(((TypeElement)((DeclaredType)iter).asElement()).getQualifiedName().toString().startsWith("org.bukkit"))
-                            bukkitInterfaceClass = iter;
-
-                    if(bukkitInterfaceClass == null)
-                        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Converter cannot contain no implemented interface from org.bukkit", classElement);
-
-                    DeclaredType superClassTypeMirror = (DeclaredType)classElement.getSuperclass();
-
-                    if(superClassTypeMirror.getKind() == TypeKind.NONE)
-                        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Converter must have Wrapper<T> as superclass", classElement);
-
-                    if(!((TypeElement)superClassTypeMirror.asElement()).getQualifiedName().toString().equals("com.floweytf.forgebukkit.Wrapper"))
-                        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Converter must have Wrapper<T> as superclass", classElement);
-
-                    TypeElement wrapperTypeParamElement = (TypeElement)(((DeclaredType)superClassTypeMirror.getTypeArguments().get(0)).asElement());
-
-                    if(!wrapperTypeParamElement.getQualifiedName().toString().startsWith("net.minecraft"))
-                        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Superclass is not Wrapper<net.minecraft.*>", classElement);
-
-                    if(!checkMethod(classElement, roundEnv, (TypeElement) ((DeclaredType)bukkitInterfaceClass).asElement(), wrapperTypeParamElement))
+                    if(!checkMethod(classElement))
                         processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Class does not have toMinecraft and toBukkit methods with correct parameters", classElement);
                 }
             }
@@ -63,45 +36,66 @@ public class AnnotationProcessor extends AbstractProcessor {
         return true;
     }
 
-    public static boolean checkMethod(TypeElement typeElement, RoundEnvironment roundEnv, TypeElement bukkitType, TypeElement minecraftType) {
-        boolean hasToMinecraft = false;
-        boolean hasToBukkit = false;
+    public boolean checkMethod(TypeElement typeElement) {
+        ExecutableElement toMinecraftMethod = null;
+        ExecutableElement toBukkitMethod = null;
 
         for(Element methodElement : typeElement.getEnclosedElements()) {
             if (methodElement instanceof ExecutableElement) {
-                if(checkMethodMinecraft((ExecutableElement) methodElement, roundEnv, bukkitType, minecraftType))
-                    hasToMinecraft = true;
-                if(checkMethodBukkit((ExecutableElement) methodElement, roundEnv, bukkitType, minecraftType))
-                    hasToBukkit = true;
+                if(checkMethodMinecraft((ExecutableElement) methodElement)) {
+                    if(toMinecraftMethod != null)
+                        return false;
+                    toMinecraftMethod = (ExecutableElement) methodElement;
+                }
+
+                if(checkMethodBukkit((ExecutableElement) methodElement)) {
+                    if(toBukkitMethod != null)
+                        return false;
+                    toBukkitMethod = (ExecutableElement) methodElement;
+                }
             }
         }
 
-        return hasToMinecraft && hasToBukkit;
+        if(toMinecraftMethod == null || toBukkitMethod == null)
+            return false;
+
+        return
+            processingEnv.getTypeUtils().isSameType(toMinecraftMethod.getReturnType(), getParam(toBukkitMethod)) &&
+            processingEnv.getTypeUtils().isSameType(toBukkitMethod.getReturnType(), getParam(toMinecraftMethod));
     }
 
-    public static boolean checkMethodMinecraft(ExecutableElement method, RoundEnvironment roundEnv, TypeElement bukkitType, TypeElement minecraftType) {
+    public boolean checkMethodMinecraft(ExecutableElement method) {
         if(!method.getSimpleName().toString().equals("toMinecraft"))
             return false;
 
         if(method.getParameters().size() != 1)
             return false;
 
-        if(!method.getReturnType().equals(minecraftType.asType()))
-            return false;
-
-        return method.getParameters().get(1).asType().equals(bukkitType.asType());
+        return true;
     }
 
-    public static boolean checkMethodBukkit(ExecutableElement method, RoundEnvironment roundEnv, TypeElement bukkitType, TypeElement minecraftType) {
-        if(!method.getSimpleName().toString().equals("toBukkit"))
+    public boolean checkMethodBukkit(ExecutableElement method) {
+        if(!method.getSimpleName().contentEquals("toBukkit"))
             return false;
 
         if(method.getParameters().size() != 1)
             return false;
 
-        if(!method.getReturnType().equals(bukkitType.asType()))
-            return false;
+        return true;
+    }
 
-        return method.getParameters().get(1).asType().equals(minecraftType.asType());
+    public static TypeMirror getParam(ExecutableElement method) {
+        return method.getParameters().get(0).asType();
+    }
+
+    public static TypeElement getElement(TypeMirror mirror) {
+        if(mirror.getKind() == TypeKind.DECLARED)
+            return (TypeElement) ((DeclaredType)mirror).asElement();
+        System.out.println("WTF");
+        System.out.println(mirror.getKind().toString());
+        for (StackTraceElement ste : Thread.currentThread().getStackTrace()) {
+            System.out.println(ste);
+        }
+        return null;
     }
 }
