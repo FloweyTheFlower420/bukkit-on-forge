@@ -95,7 +95,7 @@ public abstract class ForgeBukkitMob extends ForgeBukkitLivingEntity implements 
 
     @Override
     public LootTable getLootTable() {
-        NamespacedKey key = ForgeBukkitNamespacedKey.fromMinecraft(getHandle().getLootTableResourceLocation());
+        NamespacedKey key = ForgeBukkitNamespacedKey.toBukkit(getHandle().getLootTableResourceLocation());
         return Bukkit.getLootTable(key);
     }
 

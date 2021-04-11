@@ -14,7 +14,7 @@ public class ForgeBukkitEnchantment extends Enchantment {
     private final net.minecraft.enchantment.Enchantment target;
 
     public ForgeBukkitEnchantment(net.minecraft.enchantment.Enchantment target) {
-        super(ForgeBukkitNamespacedKey.fromMinecraft(Objects.requireNonNull(Registry.ENCHANTMENT.getKey(target))));
+        super(ForgeBukkitNamespacedKey.toBukkit(Objects.requireNonNull(Registry.ENCHANTMENT.getKey(target))));
         this.target = target;
     }
 

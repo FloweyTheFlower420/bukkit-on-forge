@@ -14,6 +14,6 @@ public final class ForgeBukkitMemoryKey {
     }
 
     public static <T, U> MemoryKey<U> toMemoryKey(MemoryModuleType<T> memoryModuleType) {
-        return MemoryKey.getByKey(ForgeBukkitNamespacedKey.fromMinecraft(Registry.MEMORY_MODULE_TYPE.getKey(memoryModuleType)));
+        return MemoryKey.getByKey(ForgeBukkitNamespacedKey.toBukkit(Registry.MEMORY_MODULE_TYPE.getKey(memoryModuleType)));
     }
 }

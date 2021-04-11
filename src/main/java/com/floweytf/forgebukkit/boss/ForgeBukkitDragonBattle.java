@@ -1,10 +1,9 @@
 package com.floweytf.forgebukkit.boss;
 
-import com.floweytf.forgebukkit.ForgeBukkit;
 import com.floweytf.forgebukkit.ForgeBukkitWorld;
 import com.floweytf.forgebukkit.Wrapper;
 import com.floweytf.forgebukkit.entity.ForgeBukkitEntity;
-import com.floweytf.forgebukkit.mixins.DragonFightManagerMixin;
+import com.floweytf.forgebukkit.util.Converter;
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.end.DragonFightManager;
@@ -15,7 +14,6 @@ import org.bukkit.boss.DragonBattle;
 import org.bukkit.entity.EnderDragon;
 
 import javax.annotation.Nonnull;
-import java.lang.reflect.InvocationTargetException;
 
 public class ForgeBukkitDragonBattle extends Wrapper<DragonFightManager> implements DragonBattle {
     public ForgeBukkitDragonBattle(DragonFightManager handle) {
@@ -24,7 +22,7 @@ public class ForgeBukkitDragonBattle extends Wrapper<DragonFightManager> impleme
 
     @Override
     public EnderDragon getEnderDragon() {
-        Entity entity = getHandle().entity.getEntityByUuid(getHandle().dragonUniqueId);
+        Entity entity = getHandle().world.getEntityByUuid(getHandle().dragonUniqueId);
         return (entity != null) ? (EnderDragon) ForgeBukkitEntity.wrap(entity) : null;
     }
 
@@ -49,12 +47,10 @@ public class ForgeBukkitDragonBattle extends Wrapper<DragonFightManager> impleme
 
     @Override
     public boolean generateEndPortal(boolean withPortals) {
-        if (getHandle().exitPortalLocation != null || getHandle().portalPattern != null) {
+        if (getHandle().exitPortalLocation != null || getHandle().portalPattern != null)
             return false;
-        }
 
-        return getHandle().generatePortal(withPortals);
-
+        getHandle().generatePortal(withPortals);
         return true;
     }
 
@@ -71,7 +67,7 @@ public class ForgeBukkitDragonBattle extends Wrapper<DragonFightManager> impleme
     @Override
     @Nonnull
     public RespawnPhase getRespawnPhase() {
-        return toBukkitRespawnPhase(getHandle().respawnState);
+        return RespawnPhaseConverter.toBukkit(getHandle().respawnState);
     }
 
     @Override
@@ -81,7 +77,7 @@ public class ForgeBukkitDragonBattle extends Wrapper<DragonFightManager> impleme
         if (getHandle().respawnState == null)
             return false;
 
-        getHandle().respawnState = toMcRespawnPhase(phase);
+        getHandle().respawnState = RespawnPhaseConverter.toMinecraft(phase);
         return true;
     }
 
@@ -100,11 +96,14 @@ public class ForgeBukkitDragonBattle extends Wrapper<DragonFightManager> impleme
         return obj instanceof ForgeBukkitDragonBattle && ((ForgeBukkitDragonBattle) obj).getHandle() == this.getHandle();
     }
 
-    private RespawnPhase toBukkitRespawnPhase(DragonSpawnState phase) {
-        return (phase != null) ? RespawnPhase.values()[phase.ordinal()] : RespawnPhase.NONE;
-    }
+    @Converter
+    public static class RespawnPhaseConverter {
+        public static RespawnPhase toBukkit(DragonSpawnState phase) {
+            return (phase != null) ? RespawnPhase.values()[phase.ordinal()] : RespawnPhase.NONE;
+        }
 
-    private DragonSpawnState toMcRespawnPhase(RespawnPhase phase) {
-        return (phase != RespawnPhase.NONE) ? DragonSpawnState.values()[phase.ordinal()] : null;
+        public static DragonSpawnState toMinecraft(RespawnPhase phase) {
+            return (phase != RespawnPhase.NONE) ? DragonSpawnState.values()[phase.ordinal()] : null;
+        }
     }
 }

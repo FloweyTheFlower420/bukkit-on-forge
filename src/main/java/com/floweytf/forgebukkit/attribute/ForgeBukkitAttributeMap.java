@@ -1,6 +1,7 @@
 package com.floweytf.forgebukkit.attribute;
 
 import com.floweytf.forgebukkit.Wrapper;
+import com.floweytf.forgebukkit.util.Converter;
 import com.floweytf.forgebukkit.util.ForgeBukkitNamespacedKey;
 import com.google.common.base.Preconditions;
 import net.minecraft.entity.ai.attributes.AttributeModifierManager;
@@ -12,6 +13,7 @@ import org.bukkit.attribute.AttributeInstance;
 
 import javax.annotation.Nonnull;
 
+@Converter
 public class ForgeBukkitAttributeMap extends Wrapper<AttributeModifierManager> implements Attributable {
     public ForgeBukkitAttributeMap(AttributeModifierManager handle) {
         super(handle);
@@ -29,7 +31,7 @@ public class ForgeBukkitAttributeMap extends Wrapper<AttributeModifierManager> i
         return net.minecraft.util.registry.Registry.ATTRIBUTE.getOrDefault(ForgeBukkitNamespacedKey.toMinecraft(attribute.getKey()));
     }
 
-    public static Attribute fromMinecraft(String mc) {
-        return Registry.ATTRIBUTE.get(ForgeBukkitNamespacedKey.fromString(mc));
+    public static Attribute toBukkit(net.minecraft.entity.ai.attributes.Attribute mc) {
+        return Registry.ATTRIBUTE.get(ForgeBukkitNamespacedKey.toBukkit(mc.getRegistryName()));
     }
 }

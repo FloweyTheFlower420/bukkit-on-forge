@@ -1,5 +1,6 @@
 package com.floweytf.forgebukkit.util;
 
+import com.floweytf.forgebukkit.block.data.ForgeBukkitBlockData;
 import com.floweytf.forgebukkit.inventory.ForgeBukkitItemStack;
 import com.floweytf.forgebukkit.legacy.ForgeBukkitLegacy;
 import com.google.common.base.Charsets;
@@ -21,9 +22,13 @@ import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.NBTDynamicOps;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SharedConstants;
+import net.minecraft.util.datafix.DataFixesManager;
+import net.minecraft.util.datafix.TypeReferences;
 import net.minecraft.util.registry.Registry;
 import org.bukkit.Bukkit;
 import org.bukkit.Fluid;
@@ -83,7 +88,7 @@ public final class ForgeBukkitMagicNumbers implements UnsafeValues {
             ITEM_MATERIAL.put(item, Material.getMaterial(Registry.ITEM.getKey(item).getPath().toUpperCase(Locale.ROOT)));
 
         for (net.minecraft.fluid.Fluid fluid : Registry.FLUID)
-            FLUID_MATERIAL.put(fluid, org.bukkit.Registry.FLUID.get(ForgeBukkitNamespacedKey.fromMinecraft(Registry.FLUID.getKey(fluid))));
+            FLUID_MATERIAL.put(fluid, org.bukkit.Registry.FLUID.get(ForgeBukkitNamespacedKey.toBukkit(Registry.FLUID.getKey(fluid))));
 
         for (Material material : Material.values()) {
             if (material.isLegacy()) {
@@ -166,7 +171,7 @@ public final class ForgeBukkitMagicNumbers implements UnsafeValues {
 
     @Override
     public BlockData fromLegacy(Material material, byte data) {
-        return CraftBlockData.fromData(getBlock(material, data));
+        return ForgeBukkitBlockData.fromData(getBlock(material, data));
     }
 
     @Override
@@ -179,11 +184,12 @@ public final class ForgeBukkitMagicNumbers implements UnsafeValues {
             return Material.getMaterial(material);
         }
 
-        Dynamic<INBT> name = new Dynamic<>(DynamicOpsNBT.a, NBTTagString.a("minecraft:" + material.toLowerCase(Locale.ROOT)));
-        Dynamic<INBT> converted = DataConverterRegistry.a().update(DataConverterTypes.ITEM_NAME, name, version, this.getDataVersion());
+        // DyNaMicUrMumGotEm
+        Dynamic<INBT> name = new Dynamic<>(NBTDynamicOps.INSTANCE, StringNBT.valueOf("minecraft:" + material.toLowerCase(Locale.ROOT)));
+        Dynamic<INBT> converted = DataFixesManager.getDataFixer().update(TypeReferences.ITEM_NAME, name, version, this.getDataVersion());
 
         if (name.equals(converted)) {
-            converted = DataConverterRegistry.a().update(DataConverterTypes.BLOCK_NAME, name, version, this.getDataVersion());
+            converted = DataFixesManager.getDataFixer().update(TypeReferences.BLOCK_NAME, name, version, this.getDataVersion());
         }
 
         return Material.matchMaterial(converted.asString(""));
@@ -205,7 +211,7 @@ public final class ForgeBukkitMagicNumbers implements UnsafeValues {
      * @return string
      */
     public String getMappingsVersion() {
-        return "54e89c47309b53737f894f1bf1b0edbe";
+        return "mappings_20210309-1.16.5";
     }
 
     @Override

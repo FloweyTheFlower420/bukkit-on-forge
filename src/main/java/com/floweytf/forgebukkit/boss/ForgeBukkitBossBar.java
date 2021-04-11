@@ -3,7 +3,9 @@ package com.floweytf.forgebukkit.boss;
 import com.floweytf.forgebukkit.ForgeBukkit;
 import com.floweytf.forgebukkit.Wrapper;
 import com.floweytf.forgebukkit.entity.ForgeBukkitEntity;
+import com.floweytf.forgebukkit.entity.impl.ForgeBukkitEnderDragon;
 import com.floweytf.forgebukkit.entity.impl.ForgeBukkitPlayer;
+import com.floweytf.forgebukkit.util.Converter;
 import com.floweytf.forgebukkit.util.ForgeBukkitChatMessage;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -32,9 +34,9 @@ public class ForgeBukkitBossBar extends Wrapper<ServerBossInfo> implements BossB
         super(null);
 
         super.setHandle(new ServerBossInfo(
-                ForgeBukkitChatMessage.fromString(title, true)[0],
-                convertColor(color),
-                convertStyle(style)
+            ForgeBukkitChatMessage.fromString(title, true)[0],
+            ColorConverter.toMinecraft(color),
+            StyleConverter.toMinecraft(style)
         ));
 
         this.initialize();
@@ -59,45 +61,51 @@ public class ForgeBukkitBossBar extends Wrapper<ServerBossInfo> implements BossB
         this.flags.put(BarFlag.CREATE_FOG, new FlagContainer(getHandle()::shouldCreateFog, getHandle()::setCreateFog));
     }
 
-    private BarColor convertColor(BossInfo.Color color) {
-        BarColor bukkitColor = BarColor.valueOf(color.name());
-        return (bukkitColor == null) ? BarColor.WHITE : bukkitColor;
-    }
+    @Converter
+    public static class ColorConverter {
+        public static BarColor toBukkit(BossInfo.Color color) {
+            BarColor bukkitColor = BarColor.valueOf(color.name());
+            return (bukkitColor == null) ? BarColor.WHITE : bukkitColor;
+        }
 
-    private BossInfo.Color convertColor(BarColor color) {
-        BossInfo.Color mcColor = BossInfo.Color.valueOf(color.name());
-        return (mcColor == null) ? BossInfo.Color.WHITE : mcColor;
-    }
-
-    private BossInfo.Overlay convertStyle(BarStyle style) {
-        switch (style) {
-            default:
-            case SOLID:
-                return BossInfo.Overlay.PROGRESS;
-            case SEGMENTED_6:
-                return BossInfo.Overlay.NOTCHED_6;
-            case SEGMENTED_10:
-                return BossInfo.Overlay.NOTCHED_10;
-            case SEGMENTED_12:
-                return BossInfo.Overlay.NOTCHED_12;
-            case SEGMENTED_20:
-                return BossInfo.Overlay.NOTCHED_20;
+        public static BossInfo.Color toMinecraft(BarColor color) {
+            BossInfo.Color mcColor = BossInfo.Color.valueOf(color.name());
+            return (mcColor == null) ? BossInfo.Color.WHITE : mcColor;
         }
     }
 
-    private BarStyle convertStyle(BossInfo.Overlay style) {
-        switch (style) {
-            default:
-            case PROGRESS:
-                return BarStyle.SOLID;
-            case NOTCHED_6:
-                return BarStyle.SEGMENTED_6;
-            case NOTCHED_10:
-                return BarStyle.SEGMENTED_10;
-            case NOTCHED_12:
-                return BarStyle.SEGMENTED_12;
-            case NOTCHED_20:
-                return BarStyle.SEGMENTED_20;
+    @Converter
+    public static class StyleConverter {
+        public static BossInfo.Overlay toMinecraft(BarStyle style) {
+            switch (style) {
+                default:
+                case SOLID:
+                    return BossInfo.Overlay.PROGRESS;
+                case SEGMENTED_6:
+                    return BossInfo.Overlay.NOTCHED_6;
+                case SEGMENTED_10:
+                    return BossInfo.Overlay.NOTCHED_10;
+                case SEGMENTED_12:
+                    return BossInfo.Overlay.NOTCHED_12;
+                case SEGMENTED_20:
+                    return BossInfo.Overlay.NOTCHED_20;
+            }
+        }
+
+        public static BarStyle toBukkit(BossInfo.Overlay style) {
+            switch (style) {
+                default:
+                case PROGRESS:
+                    return BarStyle.SOLID;
+                case NOTCHED_6:
+                    return BarStyle.SEGMENTED_6;
+                case NOTCHED_10:
+                    return BarStyle.SEGMENTED_10;
+                case NOTCHED_12:
+                    return BarStyle.SEGMENTED_12;
+                case NOTCHED_20:
+                    return BarStyle.SEGMENTED_20;
+            }
         }
     }
 
@@ -120,12 +128,12 @@ public class ForgeBukkitBossBar extends Wrapper<ServerBossInfo> implements BossB
     @Override
     @Nonnull
     public BarColor getColor() {
-        return convertColor(getHandle().getColor());
+        return ColorConverter.toBukkit(getHandle().getColor());
     }
 
     @Override
     public void setColor(@Nonnull BarColor color) {
-        getHandle().setColor(convertColor(color));
+        getHandle().setColor(ColorConverter.toMinecraft(color));
         try {
             ForgeBukkit.sendUpdate.invoke(getHandle(), SUpdateBossInfoPacket.Operation.UPDATE_NAME);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -136,12 +144,12 @@ public class ForgeBukkitBossBar extends Wrapper<ServerBossInfo> implements BossB
     @Override
     @Nonnull
     public BarStyle getStyle() {
-        return convertStyle(getHandle().getOverlay());
+        return StyleConverter.toBukkit(getHandle().getOverlay());
     }
 
     @Override
     public void setStyle(@Nonnull BarStyle style) {
-        getHandle().setOverlay(convertStyle(style));
+        getHandle().setOverlay(StyleConverter.toMinecraft(style));
         try {
             ForgeBukkit.sendUpdate.invoke(getHandle(), SUpdateBossInfoPacket.Operation.UPDATE_NAME);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -190,14 +198,14 @@ public class ForgeBukkitBossBar extends Wrapper<ServerBossInfo> implements BossB
         Preconditions.checkArgument(player != null, "player == null");
         Preconditions.checkArgument(((ForgeBukkitPlayer) player).getHandle().connection != null, "player is not fully connected (wait for PlayerJoinEvent)");
 
-        getHandle().addPlayer(((ForgeBukkitPlayer) player).getHandle());
+        getHandle().addPlayer((ServerPlayerEntity) ((ForgeBukkitPlayer) player).getHandle());
     }
 
     @Override
     public void removePlayer(@Nonnull Player player) {
         Preconditions.checkArgument(player != null, "player == null");
 
-        getHandle().removePlayer(((ForgeBukkitPlayer) player).getHandle());
+        getHandle().removePlayer((ServerPlayerEntity) ((ForgeBukkitPlayer) player).getHandle());
     }
 
     @Override

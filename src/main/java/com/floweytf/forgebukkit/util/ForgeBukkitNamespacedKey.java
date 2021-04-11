@@ -3,6 +3,7 @@ package com.floweytf.forgebukkit.util;
 import net.minecraft.util.ResourceLocation;
 import org.bukkit.NamespacedKey;
 
+@Converter
 public class ForgeBukkitNamespacedKey {
     public ForgeBukkitNamespacedKey() {
     }
@@ -17,14 +18,14 @@ public class ForgeBukkitNamespacedKey {
         } catch (Exception ignored) {
         }
 
-        return (minecraft == null) ? null : fromMinecraft(minecraft);
+        return (minecraft == null) ? null : toBukkit(minecraft);
     }
 
     public static NamespacedKey fromString(String string) {
-        return fromMinecraft(new ResourceLocation(string));
+        return toBukkit(new ResourceLocation(string));
     }
 
-    public static NamespacedKey fromMinecraft(ResourceLocation minecraft) {
+    public static NamespacedKey toBukkit(ResourceLocation minecraft) {
         return new NamespacedKey(minecraft.getNamespace(), minecraft.getPath());
     }
 

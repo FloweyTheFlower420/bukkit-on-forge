@@ -4,3 +4,5 @@ A little project that tries to load bukkit api plugins in a forge mod. This migh
 
 ## Why did I make it?
 There are no modern bukkit API support on forge. This also doesn't use hacky coremodding, and uses all modern forge methods to implement things.
+
+Also, please ignore the annotation processor, that's to ensure some methods exist.

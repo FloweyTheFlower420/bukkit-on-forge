@@ -17,7 +17,7 @@ public class ForgeBukkitAdvancement extends Wrapper<net.minecraft.advancements.A
     @Override
     @Nonnull
     public NamespacedKey getKey() {
-        return ForgeBukkitNamespacedKey.fromMinecraft(getHandle().getId());
+        return ForgeBukkitNamespacedKey.toBukkit(getHandle().getId());
     }
 
     @Override
