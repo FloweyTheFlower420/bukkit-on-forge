@@ -3,6 +3,8 @@ package com.floweytf.forgebukkit.events;
 import com.floweytf.forgebukkit.ForgeBukkitBlock;
 import com.floweytf.forgebukkit.entity.ForgeBukkitEntity;
 import com.floweytf.forgebukkit.entity.impl.ForgeBukkitPlayer;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.bukkit.event.block.*;
@@ -52,5 +54,7 @@ public class BlockEvents {
         new BlockBreakEvent(ForgeBukkitBlock.wrap(event.getState().getBlock()), (ForgeBukkitPlayer)ForgeBukkitEntity.wrap(event.getPlayer()));
     }
 
+    @SubscribeEvent
+    public void onBlockBurn(BlockEvent.)
 
 }

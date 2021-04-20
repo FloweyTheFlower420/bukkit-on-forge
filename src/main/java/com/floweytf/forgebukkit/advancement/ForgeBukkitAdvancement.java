@@ -2,6 +2,7 @@ package com.floweytf.forgebukkit.advancement;
 
 import com.floweytf.forgebukkit.Wrapper;
 import com.floweytf.forgebukkit.util.ForgeBukkitNamespacedKey;
+import net.minecraft.client.Minecraft;
 import org.bukkit.NamespacedKey;
 import org.bukkit.advancement.Advancement;
 
