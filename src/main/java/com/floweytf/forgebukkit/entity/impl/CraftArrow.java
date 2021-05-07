@@ -65,7 +65,7 @@ public class CraftArrow extends AbstractProjectile implements AbstractArrow {
 
     @Override
     public ProjectileSource getShooter() {
-        return getHandle().func_234616_v_();
+        return getHandle().getShooter();
     }
 
     @Override

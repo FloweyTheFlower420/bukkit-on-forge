@@ -1,16 +1,13 @@
 package com.floweytf.forgebukkit.entity.impl;
 
 import com.floweytf.forgebukkit.ForgeBukkitServer;
+import com.floweytf.forgebukkit.block.data.ForgeBukkitBlockData;
 import com.floweytf.forgebukkit.entity.ForgeBukkitMonster;
+import com.floweytf.forgebukkit.util.ForgeBukkitMagicNumbers;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.monster.EndermanEntity;
-import net.minecraft.server.EntityEnderman;
-import net.minecraft.server.IBlockData;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.craftbukkit.CraftServer;
-import org.bukkit.craftbukkit.block.data.CraftBlockData;
-import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.EntityType;
 import org.bukkit.material.MaterialData;
@@ -23,33 +20,33 @@ public class CraftEnderman extends ForgeBukkitMonster implements Enderman {
     @Override
     public MaterialData getCarriedMaterial() {
         BlockState blockData = getHandle().getHeldBlockState();
-        return (blockData == null) ? Material.AIR.getNewData((byte) 0) : CraftMagicNumbers.getMaterial(blockData);
+        return (blockData == null) ? Material.AIR.getNewData((byte) 0) : ForgeBukkitMagicNumbers.getMaterial(blockData);
     }
 
     @Override
     public BlockData getCarriedBlock() {
-        IBlockData blockData = getHandle().getCarried();
-        return (blockData == null) ? null : CraftBlockData.fromData(blockData);
+        BlockState blockData = getHandle().getHeldBlockState();
+        return (blockData == null) ? null : ForgeBukkitBlockData.fromData(blockData);
     }
 
     @Override
     public void setCarriedMaterial(MaterialData data) {
-        getHandle().setCarried(CraftMagicNumbers.getBlock(data));
+        getHandle().setHeldBlockState(ForgeBukkitMagicNumbers.getBlock(data));
     }
 
     @Override
     public void setCarriedBlock(BlockData blockData) {
-        getHandle().setCarried(blockData == null ? null : ((CraftBlockData) blockData).getState());
+        getHandle().setHeldBlockState(blockData == null ? null : ((ForgeBukkitBlockData) blockData).getState());
     }
 
     @Override
     public EndermanEntity getHandle() {
-        return (EndermanEntity) entity;
+        return (EndermanEntity) super.getHandle();
     }
 
     @Override
     public String toString() {
-        return "CraftEnderman";
+        return "ForgeBukkitEnderman";
     }
 
     @Override

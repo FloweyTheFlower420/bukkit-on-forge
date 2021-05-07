@@ -1,1 +1,3 @@
 include 'annotation'
+include 'mappings-gen'
+
